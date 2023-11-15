@@ -10,6 +10,7 @@ public abstract class KEntity {
   protected final ArrayList<String> tags; // tags, can be used for almost anything
   public KEngine engine; // the engine containing the entity
   public KCollider.Hitbox collider; // included to prevent object slicing, does not need to be initialized
+  public boolean markForDelete = false;
 
   // default ctor, intializes tags to an empty array
   KEntity() {

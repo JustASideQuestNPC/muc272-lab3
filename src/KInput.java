@@ -1,4 +1,5 @@
 import processing.core.PConstants;
+import processing.core.PVector;
 
 import java.util.HashMap;
 
@@ -19,6 +20,11 @@ public class KInput {
   // will not affect inputs that have already been added!
   public static BindMode defaultMode = BindMode.CONTINUOUS;
 
+  // mouse vectors
+  public static PVector mousePos = new PVector();
+  public static PVector pmousePos = new PVector();
+  public static PVector mouseDelta = new PVector();
+
   // adds an input binding to the handler. if an input binding with the same name already exists, it is overwritten
   public static void addInput(String name, Key[] keys, BindMode mode) {
     inputBinds.put(name, new Bind(keys, mode));
@@ -35,7 +41,12 @@ public class KInput {
   }
 
   // updates all inputs
-  public static void update() {
+  public static void update(int mouseX, int mouseY) {
+    // update mouse vectors
+    pmousePos.set(mousePos);
+    mousePos.set(mouseX, mouseY);
+    mouseDelta.set(PVector.sub(mousePos, pmousePos));
+
     // forEach takes a function (or a lambda, which is an unnamed, single-use function that's meant for things like
     // this), then loops through the container (in this case a hashmap) and calls that function on every item inside it
     inputBinds.forEach((s, bind) -> bind.update());

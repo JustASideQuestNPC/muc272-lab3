@@ -1,12 +1,13 @@
 import processing.core.PGraphics;
 import processing.core.PVector;
 
-import static java.lang.Math.abs;
-import static java.lang.Math.max;
+import static java.lang.Math.*;
 
 public class Player extends KEntity {
   private static final float maxVelocity = 750, acceleration = 1000, friction = 1000;
-  public PVector position, velocity;
+  public PVector position, velocity, onscreenPos;
+  public float aimDirection;
+  private Weapon weapon;
 
   // ctor
   Player(PVector pos) {
@@ -28,6 +29,12 @@ public class Player extends KEntity {
     pg.noStroke();
     pg.fill(0xffff0000);
     pg.ellipse(position.x, position.y, 50, 50);
+
+    pg.stroke(0xff000000);
+    pg.strokeWeight(5);
+    pg.line(position.x, position.y,
+            position.x + (float)cos(aimDirection) * 25,
+            position.y + (float)sin(aimDirection) * 25);
   }
 
   // updates the player with the current time delta
@@ -72,5 +79,19 @@ public class Player extends KEntity {
 
     // update engine camera
     engine.setCameraTarget(position);
+
+    // find where on the canvas the player is displayed
+    onscreenPos = PVector.add(PVector.sub(position, engine.getCameraPos()), engine.getCameraOffset());
+
+    // update aim angle
+    aimDirection = (float)atan2(KInput.mousePos.y - onscreenPos.y, KInput.mousePos.x - onscreenPos.x);
+    // fire weapon
+    weapon.doFireCheck();
+  }
+
+  // equips a new weapon
+  public void equipWeapon(Weapon weapon) {
+    this.weapon = weapon;
+    weapon.player = this;
   }
 }

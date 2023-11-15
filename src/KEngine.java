@@ -17,6 +17,8 @@ public final class KEngine {
   private float cameraTightness = 1;
   private boolean cameraEnabled = true;
 
+  private final String ansiCodeYellow = "";
+
   // getters/setters
   public void setCameraPos(PVector cameraPos) {
     this.cameraPos.set(cameraPos);
@@ -51,6 +53,16 @@ public final class KEngine {
 
   public void setCameraOffset(float x, float y) {
     setCameraOffset(new PVector(x, y));
+  }
+
+  public PVector getCameraPos() {
+    return cameraPos;
+  }
+  public PVector getCameraTarget() {
+    return cameraTarget;
+  }
+  public PVector getCameraOffset() {
+    return cameraOffset;
   }
 
   // ctors
@@ -91,9 +103,13 @@ public final class KEngine {
     dt = (dtAsSeconds ? duration / 1000000000f : duration / 1000000f);
 
     // update all entities
-    for (KEntity ent : entities) {
-      ent.update(dt);
+    //noinspection ForLoopReplaceableByForEach
+    for (int i = 0; i < entities.size(); ++i) {
+      entities.get(i).update(dt);
     }
+
+    // remove deleted entities
+    entities.removeIf((ent) -> ent.markForDelete);
 
     if (cameraEnabled) updateCamera();
   }
@@ -110,6 +126,11 @@ public final class KEngine {
       if (ent.hasTag(tag)) tagged.add(ent);
     }
     return tagged;
+  }
+
+  // returns the number of active entities
+  public int getNumEntities() {
+    return entities.size();
   }
 
   // sets how delta time is stored and passed either "seconds" or "milliseconds" (case insensitive)

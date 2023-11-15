@@ -23,6 +23,8 @@ public class Main extends PApplet {
     KInput.addInput("move down", new Key[]{Key.S, Key.DOWN});
     KInput.addInput("move left", new Key[]{Key.A, Key.LEFT});
     KInput.addInput("move right", new Key[]{Key.D, Key.RIGHT});
+    KInput.addInput("fire semi", Key.LEFT_MOUSE, KInput.BindMode.PRESS_ONLY);
+    KInput.addInput("fire auto", Key.LEFT_MOUSE);
 
     // set up engine
     engine = new KEngine(this);
@@ -42,18 +44,35 @@ public class Main extends PApplet {
     // right wall
     engine.addEntity(new Wall(WORLD_WIDTH, 0, BORDER_WALL_THICKNESS, WORLD_HEIGHT));
 
-    engine.addEntity(new Player(width / 2f, height / 2f)); // add player
+    Player player = engine.addEntity(new Player(width / 2f, height / 2f)); // add player
+
+    // setup weapons
+    for (Weapon weapon : Weapon.values()) {
+      weapon.setEngine(engine);
+    }
+
+    // give the player a weapon
+    player.equipWeapon(Weapon.DEVGUN);
   }
 
   // draw runs once at the beginning of every frame
   @Override
   public void draw() {
     // update everything
-    KInput.update();
+    KInput.update(mouseX, mouseY);
     engine.update();
 
     background(255);
     engine.render();
+
+    // draw a debug overlay with framerate
+    noStroke();
+    fill(0x80000000);
+    rect(0, 0, 200, 52);
+    fill(0xffffffff);
+    textAlign(LEFT, TOP);
+    textSize(24);
+    text(String.format("%d FPS\n%d active entities", (int)frameRate, engine.getNumEntities()), 0, 2);
   }
 
   // input listeners
