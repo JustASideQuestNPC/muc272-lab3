@@ -15,7 +15,7 @@ public final class KEngine {
   private final PVector cameraTarget = new PVector(0, 0);
   private final PVector cameraOffset = new PVector(0, 0);
   private float cameraTightness = 1;
-  private boolean cameraEnabled = true;
+  private boolean cameraEnabled = false;
 
   private final String ansiCodeYellow = "";
 

@@ -11,6 +11,7 @@ public abstract class KEntity {
   public KEngine engine; // the engine containing the entity
   public KCollider.Hitbox collider; // included to prevent object slicing, does not need to be initialized
   public boolean markForDelete = false;
+  protected int currentHealth;
 
   // default ctor, intializes tags to an empty array
   KEntity() {
@@ -42,5 +43,15 @@ public abstract class KEntity {
 
   public final void setColliderPos(PVector pos) {
     collider.setPos(pos);
+  }
+
+  public final int getHealth() {
+    return currentHealth;
+  }
+
+  // deals damage to the entity
+  public void damage(int dmg) {
+    currentHealth -= dmg;
+    if (currentHealth <= 0) markForDelete = true;
   }
 }

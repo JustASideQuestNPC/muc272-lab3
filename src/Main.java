@@ -4,7 +4,7 @@ public class Main extends PApplet {
   // nb: if something is a constant and should never be changed, it's convention to declare it as "static final" (unless
   // it can't be static, in which case just make it final) and format its name in SCREAMING_SNAKE_CASE
   public static final int WORLD_WIDTH = 1000;
-  public static final int WORLD_HEIGHT = 600;
+  public static final int WORLD_HEIGHT = 750;
   public static final int BORDER_WALL_THICKNESS = 100;
 
   KEngine engine;
@@ -12,7 +12,7 @@ public class Main extends PApplet {
   // anything run from outside the processing editor has to call size() in settings() because...reasons?
   @Override
   public void settings() {
-    size(1280, 720);
+    fullScreen();
   }
 
   // all other setup stuff runs in setup() as normal
@@ -28,9 +28,9 @@ public class Main extends PApplet {
 
     // set up engine
     engine = new KEngine(this);
+    engine.setCameraEnabled(true);
     engine.setCameraOffset(width / 2f, height / 2f);
-    engine.setCameraPos(width / 2f, height / 2f);
-    engine.setCameraTightness(0.01f);
+    engine.setCameraTightness(0.1f);
 
     // add world border
     // top wall
@@ -44,7 +44,8 @@ public class Main extends PApplet {
     // right wall
     engine.addEntity(new Wall(WORLD_WIDTH, 0, BORDER_WALL_THICKNESS, WORLD_HEIGHT));
 
-    Player player = engine.addEntity(new Player(width / 2f, height / 2f)); // add player
+    Player player = engine.addEntity(new Player(WORLD_WIDTH / 2f, WORLD_HEIGHT / 2f)); // add player
+    engine.setCameraPos(player.position.x, player.position.y);
 
     // setup weapons
     for (Weapon weapon : Weapon.values()) {
@@ -64,15 +65,6 @@ public class Main extends PApplet {
 
     background(255);
     engine.render();
-
-    // draw a debug overlay with framerate
-    noStroke();
-    fill(0x80000000);
-    rect(0, 0, 200, 52);
-    fill(0xffffffff);
-    textAlign(LEFT, TOP);
-    textSize(24);
-    text(String.format("%d FPS\n%d active entities", (int)frameRate, engine.getNumEntities()), 0, 2);
   }
 
   // input listeners
