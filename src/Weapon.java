@@ -8,14 +8,15 @@ import static java.lang.Math.toRadians;
 /* all player weapons - i'll give java the win here, its enums are way cooler than c++ enums */
 public enum Weapon {
   DEVGUN(
-    FireMode.AUTO,
-    1800,
+    FireMode.SEMI,
+    360,
     0,
     1200,
-    15,
+    0,
     1,
     1,
-    0
+    0,
+    50
   );
 
   private final FireMode fireMode;
@@ -26,6 +27,7 @@ public enum Weapon {
   private final int bulletsPerShot, shotsPerBurst;
   private final float spreadRange, halfSpreadRange;
   private final float recoilImpulse;
+  private final int damagePerShot;
   private KEngine engine;
   public Player player;
   private float fireTimer, burstTimer;
@@ -36,7 +38,7 @@ public enum Weapon {
 
   /* ctor */
   Weapon(FireMode fireMode, int roundsPerMinute, int burstsPerMinute, int muzzleVelocity, int spreadAngle,
-         int bulletsPerShot, int shotsPerBurst, int recoilImpulse) {
+         int bulletsPerShot, int shotsPerBurst, int recoilImpulse, int damagePerShot) {
     this.fireMode = fireMode;
     this.roundsPerMinute = roundsPerMinute;
     secondsPerRound = 1 / (roundsPerMinute / 60f);
@@ -49,6 +51,7 @@ public enum Weapon {
     this.bulletsPerShot = bulletsPerShot;
     this.shotsPerBurst = shotsPerBurst;
     this.recoilImpulse = recoilImpulse;
+    this.damagePerShot = damagePerShot;
 
     // set input checker based on firemode
     if (this.fireMode == FireMode.AUTO) {
@@ -102,7 +105,7 @@ public enum Weapon {
     for (int i = 0; i < bulletsPerShot; ++i) {
       float fireAngle = player.aimDirection + (float)(random() * spreadRange) - halfSpreadRange;
       PVector velocity = PVector.mult(PVector.fromAngle(fireAngle), muzzleVelocity);
-      engine.addEntity(new Bullet(player.position, velocity));
+      engine.addEntity(new Bullet(player.position, velocity, damagePerShot));
       // if the weapon has recoil, apply it to the player
       if (recoilImpulse != 0) {
         PVector impulse = PVector.mult(PVector.fromAngle(fireAngle), -recoilImpulse);

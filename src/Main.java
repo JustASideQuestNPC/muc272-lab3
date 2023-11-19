@@ -1,11 +1,10 @@
 import processing.core.PApplet;
-import processing.core.PFont;
 
 public class Main extends PApplet {
   // nb: if something is a constant and should never be changed, it's convention to declare it as "static final" (unless
   // it can't be static, in which case just make it final) and format its name in SCREAMING_SNAKE_CASE
   /* graphics constants */
-  public static final boolean FULLSCREEN = true; // overrides WINDOW_WIDTH and WINDOW_HEIGHT if true
+  public static final boolean FULLSCREEN = false; // overrides WINDOW_WIDTH and WINDOW_HEIGHT if true
   public static final int WINDOW_WIDTH = 1280;
   public static final int WINDOW_HEIGHT = 720;
   public static final int TARGET_FRAME_RATE = 60; // set to -1 to uncap
@@ -44,7 +43,7 @@ public class Main extends PApplet {
   /* all other setup stuff runs in setup() as normal */
   @Override
   public void setup() {
-    if (VERBOSE) System.out.println(Colors.TEAL.formatString("starting setup..."));
+    if (VERBOSE) System.out.println("starting setup...");
 
     // set target framerate
     frameRate(TARGET_FRAME_RATE);
@@ -52,7 +51,7 @@ public class Main extends PApplet {
     if (VERBOSE) {
       // things printed with print() won't appear in the console until println() or flush() is called. surprisingly,
       // this is probably the most annoying language "feature" i've had to deal with today (not that i'm complaining)
-      System.out.print(Colors.TEAL.formatString("setting up inputs..."));
+      System.out.print("setting up inputs...");
       System.out.flush();
     }
     // set up inputs
@@ -63,10 +62,10 @@ public class Main extends PApplet {
     KInput.addInput("fire semi", Key.LEFT_MOUSE, KInput.BindMode.PRESS_ONLY);
     KInput.addInput("fire auto", Key.LEFT_MOUSE);
     KInput.addInput("pause", Key.ESCAPE, KInput.BindMode.PRESS_ONLY);
-    if (VERBOSE) System.out.println(Colors.LIGHT_TEAL.formatString("done"));
+    if (VERBOSE) System.out.println("done");
 
     if (VERBOSE) {
-      System.out.print(Colors.TEAL.formatString("initializing engine..."));
+      System.out.print("initializing engine...");
       System.out.flush();
     }
     // set up engine
@@ -74,10 +73,10 @@ public class Main extends PApplet {
     engine.setCameraEnabled(true);
     engine.setCameraOffset(width / 2f, height / 2f);
     engine.setCameraTightness(0.1f);
-    if (VERBOSE) System.out.println(Colors.LIGHT_TEAL.formatString("done"));
+    if (VERBOSE) System.out.println("done");
 
     if (VERBOSE) {
-      System.out.print(Colors.TEAL.formatString("adding initial entities..."));
+      System.out.print("adding initial entities...");
       System.out.flush();
     }
     // add world border
@@ -94,30 +93,32 @@ public class Main extends PApplet {
 
     Player player = engine.addEntity(new Player(WORLD_WIDTH / 2f, WORLD_HEIGHT / 2f)); // add player
     engine.setCameraPos(player.position.x, player.position.y);
-    if (VERBOSE) System.out.println(Colors.LIGHT_TEAL.formatString("done"));
+
+    engine.addEntity(new TargetEnemy(WORLD_WIDTH / 3f, WORLD_HEIGHT / 2f));
+    if (VERBOSE) System.out.println("done");
 
     // setup weapons
     if (VERBOSE) {
-      System.out.print(Colors.TEAL.formatString("doing final weapon setup..."));
+      System.out.print("doing final weapon setup...");
       System.out.flush();
     }
     for (Weapon weapon : Weapon.values()) {
       weapon.setEngine(engine);
     }
-    if (VERBOSE) System.out.println(Colors.LIGHT_TEAL.formatString("done"));
+    if (VERBOSE) System.out.println("done");
 
     // give the player a weapon
     player.equipWeapon(Weapon.DEVGUN);
 
     if (VERBOSE) {
-      System.out.print(Colors.TEAL.formatString("setting up hud/ui..."));
+      System.out.print("setting up hud/ui...");
       System.out.flush();
     }
     // setup hud
     Hud.init(this);
-    if (VERBOSE) System.out.println(Colors.LIGHT_TEAL.formatString("done"));
+    if (VERBOSE) System.out.println("done");
 
-    if (VERBOSE) System.out.println(Colors.LIGHT_TEAL.formatString("setup complete!"));
+    if (VERBOSE) System.out.println("setup complete!");
   }
 
   /* draw runs once at the beginning of every frame */

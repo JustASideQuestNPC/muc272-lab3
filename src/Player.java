@@ -6,7 +6,7 @@ import static java.lang.Math.*;
 /* the player, obviously */
 public class Player extends KEntity {
   private static final float maxVelocity = 750, acceleration = 1000, friction = 1000;
-  private static final int BODY_COLOR = Colors.TEAL.getCode();
+  private static final int BODY_COLOR = Colors.MEDIUM_TEAL.getCode();
   private static final int AIM_LINE_COLOR = Colors.BLACK.getCode();
   public PVector position, velocity, onscreenPos;
   public float aimDirection;

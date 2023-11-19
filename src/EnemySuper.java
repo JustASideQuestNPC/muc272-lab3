@@ -1,0 +1,32 @@
+import processing.core.PGraphics;
+import processing.core.PVector;
+
+/* superclass that all enemies inherit from - currently kind of unnecessary but will become more useful later */
+public abstract class EnemySuper extends KEntity {
+  public PVector position;
+  private final int HEALTHBAR_CURRENT_COLOR = Colors.RED.getCode();
+  private final int HEALTHBAR_MAX_COLOR = Colors.DARK_RED.getCode();
+
+  /* ctor with tags that automatically appends the enemy tag */
+  EnemySuper(String... tags) {
+    super(tags);
+    this.tags.add("enemy");
+  }
+
+  /* draws a healthbar above the enemy */
+  protected final void renderHealthbar(PGraphics pg, int maxHealth, int x, int y, int width, int height) {
+    int currentHealthWidth = (int)map(currentHealth, 0, maxHealth, 0, width);
+    pg.noStroke();
+    pg.fill(HEALTHBAR_MAX_COLOR);
+    pg.rect(position.x + x - width / 2f, position.y + y, width, height);
+    pg.fill(HEALTHBAR_CURRENT_COLOR);
+    pg.rect(position.x + x - width / 2f, position.y + y, currentHealthWidth, height);
+  }
+
+  // yes, yes, i know processing has this built in, but my import statements are already enough of a mess as is
+  @SuppressWarnings("SameParameterValue") // keeps my ide happy
+  private float map(float input, float inputMin, float inputMax, float outputMin, float outputMax) {
+    float slope = (outputMax - outputMin) / (inputMax - inputMin);
+    return outputMin + (int)(slope * (input - inputMin) + 0.5);
+  }
+}

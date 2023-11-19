@@ -19,8 +19,8 @@ public abstract class KEntity {
   }
 
   /* ctor with tags */
-  KEntity(String... args) {
-    tags = new ArrayList<>(Arrays.asList(args));
+  KEntity(String... tags) {
+    this.tags = new ArrayList<>(Arrays.asList(tags));
   }
 
   /* renders the entity to pg; does nothing by default. */
