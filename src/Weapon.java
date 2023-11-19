@@ -5,35 +5,38 @@ import java.util.function.Supplier;
 import static java.lang.Math.random;
 import static java.lang.Math.toRadians;
 
-// all player weapons
+/* all player weapons - i'll give java the win here, its enums are way cooler than c++ enums */
 public enum Weapon {
   DEVGUN(
     FireMode.AUTO,
     1800,
-    180,
-    1500,
-    5,
+    0,
+    1200,
+    15,
     1,
-    3
+    1,
+    0
   );
 
   private final FireMode fireMode;
   private final int roundsPerMinute;  // only used for weapon descriptions
-  private final float secondsPerRound, secondsPerBurst; // used for timing delay between firing and bursts
+  private final float secondsPerRound, secondsPerBurst; // used for timing delay between shots and bursts
   private final int muzzleVelocity; // used for adding bullets when fire() is called
   private final int spreadAngle;
   private final int bulletsPerShot, shotsPerBurst;
   private final float spreadRange, halfSpreadRange;
+  private final float recoilImpulse;
   private KEngine engine;
   public Player player;
   private float fireTimer, burstTimer;
   private int shotsRemaining = 0;
   private boolean firing = false;
-  private final Supplier<Boolean> inputChecker;
+  private final Supplier<Boolean> inputChecker; // completely unnecessary functional interface
 
 
+  /* ctor */
   Weapon(FireMode fireMode, int roundsPerMinute, int burstsPerMinute, int muzzleVelocity, int spreadAngle,
-         int bulletsPerShot, int shotsPerBurst) {
+         int bulletsPerShot, int shotsPerBurst, int recoilImpulse) {
     this.fireMode = fireMode;
     this.roundsPerMinute = roundsPerMinute;
     secondsPerRound = 1 / (roundsPerMinute / 60f);
@@ -45,6 +48,7 @@ public enum Weapon {
     fireTimer = 0;
     this.bulletsPerShot = bulletsPerShot;
     this.shotsPerBurst = shotsPerBurst;
+    this.recoilImpulse = recoilImpulse;
 
     // set input checker based on firemode
     if (this.fireMode == FireMode.AUTO) {
@@ -55,7 +59,7 @@ public enum Weapon {
     }
   }
 
-  // checks for fire input and attempts to fire a bullet at an angle from a position
+  /* checks for fire input and attempts to fire a bullet at an angle from a position */
   public void doFireCheck() {
     // continue firing a burst if one is currently being fired
     if (firing) {
@@ -93,21 +97,26 @@ public enum Weapon {
     }
   }
 
-  // fires bullets
+  /* fires bullets */
   private void fireShot() {
     for (int i = 0; i < bulletsPerShot; ++i) {
       float fireAngle = player.aimDirection + (float)(random() * spreadRange) - halfSpreadRange;
       PVector velocity = PVector.mult(PVector.fromAngle(fireAngle), muzzleVelocity);
       engine.addEntity(new Bullet(player.position, velocity));
+      // if the weapon has recoil, apply it to the player
+      if (recoilImpulse != 0) {
+        PVector impulse = PVector.mult(PVector.fromAngle(fireAngle), -recoilImpulse);
+        player.velocity.add(impulse);
+      }
     }
   }
 
-  // sets the engine reference, called once in setup
+  /* sets the engine reference, called once in setup */
   public void setEngine(KEngine engine) {
     this.engine = engine;
   }
 
-  // getters
+  /* getters */
   public int getRoundsPerMinute() {
     return roundsPerMinute;
   }
@@ -121,6 +130,7 @@ public enum Weapon {
     return spreadAngle;
   }
 
+  /* determines what input mode is used */
   public enum FireMode {
     SEMI,
     AUTO,

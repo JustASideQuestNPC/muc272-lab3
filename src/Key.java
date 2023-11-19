@@ -6,6 +6,7 @@ public enum Key {
   SHIFT(16),
   CTRL(17), CONTROL(17),
   ALT(18),
+  ESCAPE(27), ESC(27),
   SPACE(32), SPACEBAR(32),
   PAGE_UP(33),
   PAGE_DOWN(34),

@@ -4,6 +4,7 @@ import processing.core.PVector;
 
 import java.util.ArrayList;
 
+/* handles rendering and updates for player, enemies, bullets, etc. */
 @SuppressWarnings("unused") // keeps my ide happy
 public final class KEngine {
   private final ArrayList<KEntity> entities; // holds all entities
@@ -19,7 +20,7 @@ public final class KEngine {
 
   private final String ansiCodeYellow = "";
 
-  // getters/setters
+  /* getters/setters */
   public void setCameraPos(PVector cameraPos) {
     this.cameraPos.set(cameraPos);
     // update camera target to prevent movement on the next update
@@ -42,7 +43,7 @@ public final class KEngine {
     this.cameraOffset.set(cameraOffset);
   }
 
-  // overloads that take separate coordinates instead of PVectors
+  /* overloads that take separate coordinates instead of PVectors */
   public void setCameraPos(float x, float y) {
     setCameraPos(new PVector(x, y));
   }
@@ -65,7 +66,7 @@ public final class KEngine {
     return cameraOffset;
   }
 
-  // ctors
+  /* ctors */
   KEngine(PGraphics pg) {
     entities = new ArrayList<>();
     canvas = pg;
@@ -77,7 +78,7 @@ public final class KEngine {
     this(app.getGraphics());
   }
 
-  // adds an entity to the entity list, then returns a reference to that entity
+  /* adds an entity to the entity list, then returns a reference to that entity */
   @SuppressWarnings("UnusedReturnValue") // keeps my ide happy
   public <T extends KEntity> T addEntity(T entity) {
     entity.engine = this; // all entities have a reference to the engine that contains them
@@ -85,17 +86,32 @@ public final class KEngine {
     return entity;
   }
 
-  // renders all active entities to the canvas
+  /* renders all active entities to the canvas */
   public void render() {
     canvas.pushMatrix();
     canvas.translate(-cameraPos.x + cameraOffset.x, -cameraPos.y + cameraOffset.y);
+    if (Main.SHOW_BACKGROUND_GRID) {
+      // draw a simple grid to give player movement some visual feedback
+      canvas.noStroke();
+      canvas.fill(Main.BACKGROUND_GRID_COLOR_1);
+      canvas.rect(0, 0, Main.WORLD_WIDTH, Main.WORLD_HEIGHT);
+      boolean color1 = true;
+      for (int x = 0; x < Main.WORLD_WIDTH; x += Main.BACKGROUND_GRID_SIZE) {
+        for (int y = 0; y < Main.WORLD_HEIGHT; y += Main.BACKGROUND_GRID_SIZE) {
+          canvas.fill(color1 ? Main.BACKGROUND_GRID_COLOR_1 : Main.BACKGROUND_GRID_COLOR_2);
+          canvas.rect(x, y, Main.BACKGROUND_GRID_SIZE, Main.BACKGROUND_GRID_SIZE);
+          color1 = !color1;
+        }
+        color1 = !color1;
+      }
+    }
     for (KEntity ent : entities) {
       ent.render(canvas);
     }
     canvas.popMatrix();
   }
 
-  // updates delta time and entities
+  /* updates delta time and entities */
   public void update() {
     // update delta time
     long duration = System.nanoTime() - currentTime;
@@ -114,12 +130,19 @@ public final class KEngine {
     if (cameraEnabled) updateCamera();
   }
 
-  // returns the current time delta
+  /* updates dt without updating, used when the game is paused */
+  public void updateDeltaTime() {
+    long duration = System.nanoTime() - currentTime;
+    currentTime = System.nanoTime();
+    dt = (dtAsSeconds ? duration / 1000000000f : duration / 1000000f);
+  }
+
+  /* returns the current time delta */
   public float deltaTime() {
     return dt;
   }
 
-  // returns all entities with the given tag (if there are no entities with that tag, returns an empty list)
+  /* returns all entities with the given tag (if there are no entities with that tag, returns an empty list) */
   public ArrayList<KEntity> getTagged(String tag) {
     ArrayList<KEntity> tagged = new ArrayList<>();
     for (KEntity ent : entities) {
@@ -128,12 +151,12 @@ public final class KEngine {
     return tagged;
   }
 
-  // returns the number of active entities
+  /* returns the number of active entities */
   public int getNumEntities() {
     return entities.size();
   }
 
-  // sets how delta time is stored and passed either "seconds" or "milliseconds" (case insensitive)
+  /* sets how delta time is stored and passed either "seconds" or "milliseconds" (case insensitive) */
   public void setDtMode(String mode) throws IllegalArgumentException {
     mode = mode.toLowerCase(); // i die inside a little every time someone has case-sensitive arguments
     if (mode.equals("seconds")) dtAsSeconds = true;
@@ -143,7 +166,7 @@ public final class KEngine {
       );
   }
 
-  // moves the camera toward the target based on the camera's tightness
+  /* moves the camera toward the target based on the camera's tightness */
   private void updateCamera() {
     cameraPos.set(PVector.lerp(cameraPos, cameraTarget, cameraTightness));
   }

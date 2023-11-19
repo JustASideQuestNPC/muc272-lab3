@@ -1,11 +1,11 @@
 import processing.core.PGraphics;
 import processing.core.PVector;
 
-// bullet fired by player weapons
+/* bullet fired by player weapons */
 public class Bullet extends KEntity {
   public PVector position, velocity;
 
-  // ctor
+  /* ctor */
   Bullet(PVector position, PVector velocity) {
     super("bullet"); // initialize tag list
     this.position = position.copy();
@@ -13,15 +13,15 @@ public class Bullet extends KEntity {
     collider = new KCollider.Hitbox(position);
   }
 
-  // draws the bullet to the canvas
+  /* draws the bullet to the canvas */
   @Override
   public void render(PGraphics pg) {
     pg.noStroke();
-    pg.fill(0xff000000);
+    pg.fill(Colors.PINK.getCode());
     pg.ellipse(position.x, position.y, 10, 10);
   }
 
-  // updates position and velocity
+  /* updates position and velocity */
   @Override
   public void update(float dt) {
     position.add(PVector.mult(velocity, dt));

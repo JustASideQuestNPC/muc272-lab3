@@ -4,7 +4,7 @@ import processing.core.PVector;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-// template class for entities in a game engine
+/* template class for entities in a game engine */
 @SuppressWarnings("unused") // keeps my ide happy
 public abstract class KEntity {
   protected final ArrayList<String> tags; // tags, can be used for almost anything
@@ -13,23 +13,23 @@ public abstract class KEntity {
   public boolean markForDelete = false;
   protected int currentHealth;
 
-  // default ctor, intializes tags to an empty array
+  /* default ctor, intializes tags to an empty array */
   KEntity() {
     tags = new ArrayList<>();
   }
 
-  // ctor with tags
+  /* ctor with tags */
   KEntity(String... args) {
     tags = new ArrayList<>(Arrays.asList(args));
   }
 
-  // renders the entity to pg. does nothing by default.
+  /* renders the entity to pg; does nothing by default. */
   public void render(PGraphics pg) {}
 
-  // updates the entity, is passed the time since the last update. does nothing by default.
+  /* updates the entity, is passed the time since the last update; does nothing by default. */
   public void update(float deltaTime) {}
 
-  // returns whether the entity has the specified tag
+  /* returns whether the entity has the specified tag */
   public final boolean hasTag(String tag) {
     return tags.contains(tag);
   }
@@ -49,7 +49,7 @@ public abstract class KEntity {
     return currentHealth;
   }
 
-  // deals damage to the entity
+  /* deals damage to the entity */
   public void damage(int dmg) {
     currentHealth -= dmg;
     if (currentHealth <= 0) markForDelete = true;

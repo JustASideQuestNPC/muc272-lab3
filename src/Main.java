@@ -1,23 +1,60 @@
 import processing.core.PApplet;
+import processing.core.PFont;
 
 public class Main extends PApplet {
   // nb: if something is a constant and should never be changed, it's convention to declare it as "static final" (unless
   // it can't be static, in which case just make it final) and format its name in SCREAMING_SNAKE_CASE
-  public static final int WORLD_WIDTH = 1000;
-  public static final int WORLD_HEIGHT = 750;
+  /* graphics constants */
+  public static final boolean FULLSCREEN = true; // overrides WINDOW_WIDTH and WINDOW_HEIGHT if true
+  public static final int WINDOW_WIDTH = 1280;
+  public static final int WINDOW_HEIGHT = 720;
+  public static final int TARGET_FRAME_RATE = 60; // set to -1 to uncap
+  public static final boolean SHOW_BACKGROUND_GRID = true;
+
+  /* debug stuff */
+  public static final boolean VERBOSE = true;
+
+  /* engine/world constants */
+  public static final int WORLD_WIDTH = 2000;
+  public static final int WORLD_HEIGHT = 2000;
   public static final int BORDER_WALL_THICKNESS = 100;
 
+  /* background grid constants */
+  // colors are actually just normal ints, but Processing gives them their own datatype because very weird things happen
+  // if you try to use them like ints
+  public static final int BACKGROUND_COLOR = Colors.BLACK.getCode();
+  public static final int BACKGROUND_GRID_COLOR_1 = Colors.WHITE.getCode();
+  public static final int BACKGROUND_GRID_COLOR_2 = Colors.LIGHTER_TEAL.getCode();
+  public static final int BACKGROUND_GRID_SIZE = 250;
+
+  public static boolean paused = false;
   KEngine engine;
 
-  // anything run from outside the processing editor has to call size() in settings() because...reasons?
+  /* anything run from outside the processing editor has to call size() in settings() because...reasons? */
   @Override
   public void settings() {
-    fullScreen();
+    if (FULLSCREEN) {
+      fullScreen();
+    }
+    else {
+      size(WINDOW_WIDTH, WINDOW_HEIGHT);
+    }
   }
 
-  // all other setup stuff runs in setup() as normal
+  /* all other setup stuff runs in setup() as normal */
   @Override
   public void setup() {
+    if (VERBOSE) System.out.println(Colors.TEAL.formatString("starting setup..."));
+
+    // set target framerate
+    frameRate(TARGET_FRAME_RATE);
+
+    if (VERBOSE) {
+      // things printed with print() won't appear in the console until println() or flush() is called. surprisingly,
+      // this is probably the most annoying language "feature" i've had to deal with today (not that i'm complaining)
+      System.out.print(Colors.TEAL.formatString("setting up inputs..."));
+      System.out.flush();
+    }
     // set up inputs
     KInput.addInput("move up", new Key[]{Key.W, Key.UP});
     KInput.addInput("move down", new Key[]{Key.S, Key.DOWN});
@@ -25,13 +62,24 @@ public class Main extends PApplet {
     KInput.addInput("move right", new Key[]{Key.D, Key.RIGHT});
     KInput.addInput("fire semi", Key.LEFT_MOUSE, KInput.BindMode.PRESS_ONLY);
     KInput.addInput("fire auto", Key.LEFT_MOUSE);
+    KInput.addInput("pause", Key.ESCAPE, KInput.BindMode.PRESS_ONLY);
+    if (VERBOSE) System.out.println(Colors.LIGHT_TEAL.formatString("done"));
 
+    if (VERBOSE) {
+      System.out.print(Colors.TEAL.formatString("initializing engine..."));
+      System.out.flush();
+    }
     // set up engine
     engine = new KEngine(this);
     engine.setCameraEnabled(true);
     engine.setCameraOffset(width / 2f, height / 2f);
     engine.setCameraTightness(0.1f);
+    if (VERBOSE) System.out.println(Colors.LIGHT_TEAL.formatString("done"));
 
+    if (VERBOSE) {
+      System.out.print(Colors.TEAL.formatString("adding initial entities..."));
+      System.out.flush();
+    }
     // add world border
     // top wall
     engine.addEntity(new Wall(-BORDER_WALL_THICKNESS, -BORDER_WALL_THICKNESS,
@@ -46,30 +94,68 @@ public class Main extends PApplet {
 
     Player player = engine.addEntity(new Player(WORLD_WIDTH / 2f, WORLD_HEIGHT / 2f)); // add player
     engine.setCameraPos(player.position.x, player.position.y);
+    if (VERBOSE) System.out.println(Colors.LIGHT_TEAL.formatString("done"));
 
     // setup weapons
+    if (VERBOSE) {
+      System.out.print(Colors.TEAL.formatString("doing final weapon setup..."));
+      System.out.flush();
+    }
     for (Weapon weapon : Weapon.values()) {
       weapon.setEngine(engine);
     }
+    if (VERBOSE) System.out.println(Colors.LIGHT_TEAL.formatString("done"));
 
     // give the player a weapon
     player.equipWeapon(Weapon.DEVGUN);
+
+    if (VERBOSE) {
+      System.out.print(Colors.TEAL.formatString("setting up hud/ui..."));
+      System.out.flush();
+    }
+    // setup hud
+    Hud.init(this);
+    if (VERBOSE) System.out.println(Colors.LIGHT_TEAL.formatString("done"));
+
+    if (VERBOSE) System.out.println(Colors.LIGHT_TEAL.formatString("setup complete!"));
   }
 
-  // draw runs once at the beginning of every frame
+  /* draw runs once at the beginning of every frame */
   @Override
   public void draw() {
-    // update everything
     KInput.update(mouseX, mouseY);
-    engine.update();
+    Hud.update();
 
-    background(255);
+    // check for pause input
+    if (KInput.isActive("pause")) {
+      if (paused) {
+        paused = false;
+        Hud.setState(Hud.State.NONE);
+      }
+      else {
+        paused = true;
+        Hud.setState(Hud.State.PAUSE_MENU);
+      }
+    }
+
+    // update entities if not paused
+    if (!paused) engine.update();
+    else engine.updateDeltaTime();
+
+    // render entities
+    background(BACKGROUND_COLOR);
     engine.render();
+
+    // render the hud
+    Hud.render();
   }
 
-  // input listeners
+  /* input listeners */
   @Override
   public void keyPressed() {
+    // pressing escape normally just closes the program, but we can intercept it and change the key to prevent that and
+    // open a pause menu instead
+    if (key == ESC) key = 0;
     KInput.pressKey(keyCode);
   }
   @Override
@@ -85,7 +171,7 @@ public class Main extends PApplet {
     KInput.releaseMouse(mouseButton);
   }
 
-  // java boilerplate that runs settings() and setup(), then starts the draw() loop
+  /* java boilerplate that runs settings() and setup(), then starts the draw() loop */
   public static void main(String[] args) {
     PApplet.main("Main");
   }

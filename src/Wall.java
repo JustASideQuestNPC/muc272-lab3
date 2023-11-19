@@ -1,9 +1,11 @@
 import processing.core.PGraphics;
+
+/* a wall with collision */
 public class Wall extends KEntity {
   private final float x, y, w, h;
-  private static final int color = 0xff000000;
+  private static final int color = Colors.BLACK.getCode();
 
-  // ctor
+  /* ctor */
   Wall(float x, float y, float w, float h) {
     super("wall"); // initialize tag list
 
@@ -15,7 +17,7 @@ public class Wall extends KEntity {
     collider = new KCollider.Hitbox(x, y, w, h);
   }
 
-  // renders the wall to the canvas
+  /* renders the wall to the canvas */
   @Override
   public void render(PGraphics pg) {
     pg.noStroke();

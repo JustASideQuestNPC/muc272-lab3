@@ -3,13 +3,16 @@ import processing.core.PVector;
 
 import static java.lang.Math.*;
 
+/* the player, obviously */
 public class Player extends KEntity {
   private static final float maxVelocity = 750, acceleration = 1000, friction = 1000;
+  private static final int BODY_COLOR = Colors.TEAL.getCode();
+  private static final int AIM_LINE_COLOR = Colors.BLACK.getCode();
   public PVector position, velocity, onscreenPos;
   public float aimDirection;
   private Weapon weapon;
 
-  // ctor
+  /* ctor */
   Player(PVector pos) {
     super("player"); // initialize tag list
     position = pos.copy();
@@ -18,26 +21,26 @@ public class Player extends KEntity {
     collider = new KCollider.Hitbox(pos.x, pos.y, 25);
   }
 
-  // overload that takes discrete x and y coordinates
+  /* overload that takes discrete x and y coordinates */
   Player(float x, float y) {
     this(new PVector(x, y));
   }
 
-  // draws the player to the canvas
+  /* draws the player to the canvas */
   @Override
   public void render(PGraphics pg) {
     pg.noStroke();
-    pg.fill(0xffff0000);
+    pg.fill(BODY_COLOR);
     pg.ellipse(position.x, position.y, 50, 50);
 
-    pg.stroke(0xff000000);
+    pg.stroke(AIM_LINE_COLOR);
     pg.strokeWeight(5);
     pg.line(position.x, position.y,
             position.x + (float)cos(aimDirection) * 25,
             position.y + (float)sin(aimDirection) * 25);
   }
 
-  // updates the player with the current time delta
+  /* updates the player with the current time delta */
   @Override
   public void update(float dt) {
     // convert directional keys into a single vector with the movement direction
@@ -57,6 +60,13 @@ public class Player extends KEntity {
     else {
       velocity.setMag(max(velocity.mag() - friction * dt, 0));
     }
+
+    // find where on the canvas the player is displayed
+    onscreenPos = PVector.add(PVector.sub(position, engine.getCameraPos()), engine.getCameraOffset());
+
+    // update aim angle and fire weapon
+    aimDirection = (float)atan2(KInput.mousePos.y - onscreenPos.y, KInput.mousePos.x - onscreenPos.x);
+    weapon.doFireCheck();
 
     // cap movement speed
     velocity.limit(maxVelocity);
@@ -79,17 +89,9 @@ public class Player extends KEntity {
 
     // update engine camera
     engine.setCameraTarget(position);
-
-    // find where on the canvas the player is displayed
-    onscreenPos = PVector.add(PVector.sub(position, engine.getCameraPos()), engine.getCameraOffset());
-
-    // update aim angle
-    aimDirection = (float)atan2(KInput.mousePos.y - onscreenPos.y, KInput.mousePos.x - onscreenPos.x);
-    // fire weapon
-    weapon.doFireCheck();
   }
 
-  // equips a new weapon
+  /* equips a new weapon */
   public void equipWeapon(Weapon weapon) {
     this.weapon = weapon;
     weapon.player = this;
