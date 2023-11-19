@@ -121,31 +121,18 @@ public class Hud {
 
     // render special stuff based on state
     if (state == State.GAMEPLAY) {
+      // display player stamina
+      int staminaBarXPos = width / 2 - 200;
+      int staminaBarYPos = height * 4 / 5;
+      int staminaBarWidth = 400;
+      int staminaBarHeight = 10;
+
       pg.noStroke();
-      int dashBarWidth = 80, dashBarHeight = 12, dashBarSpacing = 10;
-      int dashBarYPos = height * 4 / 5;
-      // show player dash cooldowns
-      if (Player.NUM_DASHES == 1) {
-        renderDashCooldownBar(width / 2 - dashBarWidth / 2, dashBarYPos, dashBarWidth, dashBarHeight);
-      }
-      else if (Player.NUM_DASHES > 1) {
-        int totalWidth = dashBarWidth * Player.NUM_DASHES + dashBarSpacing * (Player.NUM_DASHES - 1);
-        int dashBarStartX = width / 2 - totalWidth / 2;
-        for (int i = 0; i < Player.NUM_DASHES; ++i) {
-          int dashBarXPos = dashBarStartX + (dashBarWidth + dashBarSpacing) * i;
-          if (i < Main.player.getDashNumber()) {
-            pg.fill(Colors.MEDIUM_TEAL.getCode());
-            pg.rect(dashBarXPos, dashBarYPos, dashBarWidth, dashBarHeight);
-          }
-          else if (i > Main.player.getDashNumber()) {
-            pg.fill(Colors.TRANS_MEDIUM_TEAL.getCode());
-            pg.rect(dashBarXPos, dashBarYPos, dashBarWidth, dashBarHeight);
-          }
-          else {
-            renderDashCooldownBar(dashBarXPos, dashBarYPos, dashBarWidth, dashBarHeight);
-          }
-        }
-      }
+      pg.fill(Colors.TRANS_MEDIUM_TEAL.getCode());
+      pg.rect(staminaBarXPos, staminaBarYPos, staminaBarWidth, staminaBarHeight);
+      pg.fill(Colors.MEDIUM_TEAL.getCode());
+      pg.rect(staminaBarXPos, staminaBarYPos, (int)((float)staminaBarWidth / Player.MAX_STAMINA *
+          Main.player.getCurrentStamina() + 0.5), staminaBarHeight);
     }
 
     // draw debug overlays (if enabled)
@@ -160,14 +147,6 @@ public class Hud {
         pg.text(String.format("%03d FPS", (int)app.frameRate), 4, 3);
       }
     }
-  }
-
-  private static void renderDashCooldownBar(int x, int y, int dashBarWidth, int dashBarHeight) {
-    int cooldownBarWidth = (int)(dashBarWidth / Player.DASH_COOLDOWN * Main.player.getRemainingDashCooldown() + 0.5);
-    pg.fill(Colors.TRANS_MEDIUM_TEAL.getCode());
-    pg.rect(x, y, dashBarWidth, dashBarHeight);
-    pg.fill(Colors.MEDIUM_TEAL.getCode());
-    pg.rect(x, y, cooldownBarWidth, dashBarHeight);
   }
 
   /* determines what is currently being displayed */

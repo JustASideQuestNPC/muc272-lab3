@@ -11,6 +11,7 @@ public final class KEngine {
   private final PGraphics canvas; // all entities are drawn to this
   private long currentTime;
   private float dt; // delta time (time since last frame)
+  private float dtMult = 1f; // determines the "speed of time"
   private boolean dtAsSeconds = true; // whether delta time is stored and passed as seconds or milliseconds
   private final PVector cameraPos = new PVector(0, 0);
   private final PVector cameraTarget = new PVector(0, 0);
@@ -121,7 +122,9 @@ public final class KEngine {
     // update all entities
     //noinspection ForLoopReplaceableByForEach
     for (int i = 0; i < entities.size(); ++i) {
-      entities.get(i).update(dt);
+      KEntity ent = entities.get(i);
+      if (ent.hasTag("dt mult exempt")) ent.update(dt);
+      else if (dtMult != 0) ent.update(dt * dtMult);
     }
 
     // remove deleted entities
@@ -130,15 +133,27 @@ public final class KEngine {
     if (cameraEnabled) updateCamera();
   }
 
-  /* updates dt without updating, used when the game is paused */
+  /* updates dt without updating entities, used when the game is paused */
   public void updateDeltaTime() {
     long duration = System.nanoTime() - currentTime;
     currentTime = System.nanoTime();
     dt = (dtAsSeconds ? duration / 1000000000f : duration / 1000000f);
   }
 
-  /* returns the current time delta */
+  /* sets the multiplier for the time delta - values < 1 slow down time, and value > 1 speed it up. entities with the
+   * "dt mult exempt" tag will always recieve the un-multiplied time delta. if the multiplier is 0, entities without the
+   * "dt mult exempt" tag will not have their update() methods called at all when the engine is updated */
+  public void setDtMult(float dtMult) {
+    this.dtMult = dtMult;
+  }
+
+  /* returns the current time delta with the multiplier applied */
   public float deltaTime() {
+    return dt * dtMult;
+  }
+
+  /* returns the current time delta without the multiplier applied */
+  public float deltaTimeRaw() {
     return dt;
   }
 

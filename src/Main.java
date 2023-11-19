@@ -64,6 +64,7 @@ public class Main extends PApplet {
     KInput.addInput("fire auto", Key.LEFT_MOUSE);
     KInput.addInput("pause", Key.ESCAPE, KInput.BindMode.PRESS_ONLY);
     KInput.addInput("dash", Key.SPACEBAR, KInput.BindMode.PRESS_ONLY);
+    KInput.addInput("slow time", Key.SHIFT);
     if (VERBOSE) System.out.println("done");
 
     if (VERBOSE) {

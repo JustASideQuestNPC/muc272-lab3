@@ -13,18 +13,21 @@ public class Player extends KEntity {
   private static final float HIGH_SPEED_FRICTION_MULT = 2f; // increased friction when above the soft speed cap
   private static final float VELOCITY_SOFT_CAP_SQ = VELOCITY_SOFT_CAP * VELOCITY_SOFT_CAP; // used during updates
   private static final float VELOCITY_HARD_CAP_SQ = VELOCITY_HARD_CAP * VELOCITY_HARD_CAP;
+  public static final int MAX_STAMINA = 1000;
+  public static final int PASSIVE_STAMINA_REGEN = 50; // points/second
+  public static final int DASH_STAMINA_COST = 300;
+  public static final int SLOW_TIME_STAMINA_COST = 500; // points/second
   private static final float DASH_VELOCITY = 1500;
-  private static final float DASH_DURATION = 0.05f; // durations are in seconds
-  public static final float DASH_COOLDOWN = 1f;
-  public static final int NUM_DASHES = 3;
+  private static final float DASH_DURATION = 0.05f; // dash duration in seconds
+  public static final float SLOW_TIME_ABILITY_DT_MULT = 0.2f;
   private static final int BODY_COLOR = Colors.MEDIUM_TEAL.getCode();
   private static final int AIM_LINE_COLOR = Colors.BLACK.getCode();
   public PVector position, velocity, onscreenPos;
   public float aimDirection;
   private Weapon weapon;
   private float dashMovementTimer;
-  private int remainingDashes = NUM_DASHES;
-  private float dashCooldownTimer;
+  private float currentStamina = MAX_STAMINA;
+  private boolean passiveStaminaRegenAllowed = true;
 
   /* ctor */
   Player(PVector pos) {
@@ -33,7 +36,6 @@ public class Player extends KEntity {
     velocity = new PVector(0, 0);
     // initialize collider
     collider = new KCollider.Hitbox(pos.x, pos.y, 25);
-    // dash cooldowns are held in an array to make displaying them on the HUD easier
   }
 
   /* overload that takes discrete x and y coordinates */
@@ -70,28 +72,14 @@ public class Player extends KEntity {
       if (KInput.isActive("move left")) --moveInput.x;
       if (KInput.isActive("move right")) ++moveInput.x;
 
-      // check for a dash input if the player has at least one charged dash
-      if (remainingDashes > 0) {
+      // check for a dash input if the player has enough stamina
+      if (currentStamina >= DASH_STAMINA_COST) {
         // start a dash if the dash key and at least one movement key is pressed
         if (KInput.isActive("dash") && moveInput.magSq() != 0) {
           dashMovementTimer = DASH_DURATION;
-          --remainingDashes;
-          dashCooldownTimer = DASH_COOLDOWN;
+          currentStamina -= DASH_STAMINA_COST;
           // align velocity to the move input and scale it to dash velocity
           velocity.set(PVector.mult(moveInput, DASH_VELOCITY));
-        }
-      }
-      // update dash cooldown if needed
-      if (remainingDashes < NUM_DASHES && dashCooldownTimer > 0) {
-        dashCooldownTimer -= dt;
-        if (dashCooldownTimer <= 0) {
-          ++remainingDashes;
-          if (remainingDashes < NUM_DASHES) {
-            dashCooldownTimer = DASH_COOLDOWN;
-          }
-          else {
-            dashCooldownTimer = 0;
-          }
         }
       }
 
@@ -116,6 +104,22 @@ public class Player extends KEntity {
         if (velocity.magSq() > VELOCITY_SOFT_CAP_SQ) appliedFriction *= HIGH_SPEED_FRICTION_MULT;
         velocity.setMag(max(velocity.mag() - appliedFriction * dt, 0));
       }
+    }
+
+    passiveStaminaRegenAllowed = true;
+    if (KInput.isActive("slow time") && currentStamina > 0) {
+      engine.setDtMult(SLOW_TIME_ABILITY_DT_MULT);
+      currentStamina -= SLOW_TIME_STAMINA_COST * dt;
+      passiveStaminaRegenAllowed = false;
+    }
+    else {
+      engine.setDtMult(1);
+    }
+
+    // apply passive stamina regen
+    if (passiveStaminaRegenAllowed && currentStamina < MAX_STAMINA) {
+      currentStamina += PASSIVE_STAMINA_REGEN * dt;
+      if (currentStamina > MAX_STAMINA) currentStamina = MAX_STAMINA;
     }
 
     // hard cap velocity just in case
@@ -156,11 +160,7 @@ public class Player extends KEntity {
     weapon.player = this;
   }
 
-  public float getRemainingDashCooldown() {
-    return DASH_COOLDOWN - dashCooldownTimer;
-  }
-
-  public int getDashNumber() {
-    return remainingDashes;
+  public float getCurrentStamina() {
+    return currentStamina;
   }
 }

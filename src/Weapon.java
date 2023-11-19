@@ -8,8 +8,8 @@ import static java.lang.Math.toRadians;
 /* all player weapons - i'll give java the win here, its enums are way cooler than c++ enums */
 public enum Weapon {
   DEVGUN(
-    FireMode.SEMI,
-    360,
+    FireMode.AUTO,
+    600,
     0,
     1200,
     0,
