@@ -10,7 +10,7 @@ public class Hud {
   public static boolean ENABLE_DEBUG_OVERLAY = true; // toggles all debug overlays, overrides specific toggles
   public static boolean SHOW_FRAMERATE = false;
   private static int width, height; // for conviencence to keep names cleaner
-  private static Main parentApp;
+  private static Main app;
   private static PGraphics pg; // where to draw the hud to
   private static State state = State.NONE; // what hud to draw
 
@@ -25,7 +25,7 @@ public class Hud {
   /* sets up everything */
   public static void init(Main app) {
     // set properties taken from the parent app
-    parentApp = app;
+    Hud.app = app;
     pg = app.getGraphics();
     width = app.width;
     height = app.height;
@@ -86,7 +86,7 @@ public class Hud {
   /* updates display state */
   public static void setState(State state) {
     Hud.state = state;
-    activeButtons = buttonGroups.get(state);
+    activeButtons = buttonGroups.getOrDefault(state, new String[]{});
 
     // un-hover all buttons
     for (Button b : buttons.values()) {
@@ -107,7 +107,7 @@ public class Hud {
         setState(State.NONE);
       }
       if (buttons.get("pause menu exit to desktop").isPressed()) {
-        parentApp.exit();
+        app.exit();
       }
     }
   }
@@ -119,6 +119,35 @@ public class Hud {
       buttons.get(buttonName).render();
     }
 
+    // render special stuff based on state
+    if (state == State.GAMEPLAY) {
+      pg.noStroke();
+      int dashBarWidth = 80, dashBarHeight = 12, dashBarSpacing = 10;
+      int dashBarYPos = height * 4 / 5;
+      // show player dash cooldowns
+      if (Player.NUM_DASHES == 1) {
+        renderDashCooldownBar(width / 2 - dashBarWidth / 2, dashBarYPos, dashBarWidth, dashBarHeight);
+      }
+      else if (Player.NUM_DASHES > 1) {
+        int totalWidth = dashBarWidth * Player.NUM_DASHES + dashBarSpacing * (Player.NUM_DASHES - 1);
+        int dashBarStartX = width / 2 - totalWidth / 2;
+        for (int i = 0; i < Player.NUM_DASHES; ++i) {
+          int dashBarXPos = dashBarStartX + (dashBarWidth + dashBarSpacing) * i;
+          if (i < Main.player.getDashNumber()) {
+            pg.fill(Colors.MEDIUM_TEAL.getCode());
+            pg.rect(dashBarXPos, dashBarYPos, dashBarWidth, dashBarHeight);
+          }
+          else if (i > Main.player.getDashNumber()) {
+            pg.fill(Colors.TRANS_MEDIUM_TEAL.getCode());
+            pg.rect(dashBarXPos, dashBarYPos, dashBarWidth, dashBarHeight);
+          }
+          else {
+            renderDashCooldownBar(dashBarXPos, dashBarYPos, dashBarWidth, dashBarHeight);
+          }
+        }
+      }
+    }
+
     // draw debug overlays (if enabled)
     if (ENABLE_DEBUG_OVERLAY) {
       if (SHOW_FRAMERATE) {
@@ -128,14 +157,23 @@ public class Hud {
         pg.fill(0xff00ff00);
         pg.textFont(UAV_OSD_SANS_MONO_14);
         pg.textAlign(LEFT, TOP);
-        pg.text(String.format("%03d FPS", (int)parentApp.frameRate), 4, 3);
+        pg.text(String.format("%03d FPS", (int)app.frameRate), 4, 3);
       }
     }
+  }
+
+  private static void renderDashCooldownBar(int x, int y, int dashBarWidth, int dashBarHeight) {
+    int cooldownBarWidth = (int)(dashBarWidth / Player.DASH_COOLDOWN * Main.player.getRemainingDashCooldown() + 0.5);
+    pg.fill(Colors.TRANS_MEDIUM_TEAL.getCode());
+    pg.rect(x, y, dashBarWidth, dashBarHeight);
+    pg.fill(Colors.MEDIUM_TEAL.getCode());
+    pg.rect(x, y, cooldownBarWidth, dashBarHeight);
   }
 
   /* determines what is currently being displayed */
   public enum State {
     NONE, // disables the hud except for debug info
-    PAUSE_MENU
+    PAUSE_MENU,
+    GAMEPLAY
   }
 }

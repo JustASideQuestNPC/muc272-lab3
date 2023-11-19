@@ -22,7 +22,7 @@ public enum Weapon {
   private final FireMode fireMode;
   private final int roundsPerMinute;  // only used for weapon descriptions
   private final float secondsPerRound, secondsPerBurst; // used for timing delay between shots and bursts
-  private final int muzzleVelocity; // used for adding bullets when fire() is called
+  private final int muzzleVelocity;
   private final int spreadAngle;
   private final int bulletsPerShot, shotsPerBurst;
   private final float spreadRange, halfSpreadRange;
@@ -117,20 +117,6 @@ public enum Weapon {
   /* sets the engine reference, called once in setup */
   public void setEngine(KEngine engine) {
     this.engine = engine;
-  }
-
-  /* getters */
-  public int getRoundsPerMinute() {
-    return roundsPerMinute;
-  }
-  public int getMuzzleVelocity() {
-    return muzzleVelocity;
-  }
-  public FireMode getFireMode() {
-    return fireMode;
-  }
-  public int getSpreadAngle() {
-    return spreadAngle;
   }
 
   /* determines what input mode is used */

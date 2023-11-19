@@ -25,6 +25,7 @@ public class Main extends PApplet {
   public static final int BACKGROUND_GRID_COLOR_1 = Colors.WHITE.getCode();
   public static final int BACKGROUND_GRID_COLOR_2 = Colors.LIGHTER_TEAL.getCode();
   public static final int BACKGROUND_GRID_SIZE = 250;
+  public static Player player;
 
   public static boolean paused = false;
   KEngine engine;
@@ -62,6 +63,7 @@ public class Main extends PApplet {
     KInput.addInput("fire semi", Key.LEFT_MOUSE, KInput.BindMode.PRESS_ONLY);
     KInput.addInput("fire auto", Key.LEFT_MOUSE);
     KInput.addInput("pause", Key.ESCAPE, KInput.BindMode.PRESS_ONLY);
+    KInput.addInput("dash", Key.SPACEBAR, KInput.BindMode.PRESS_ONLY);
     if (VERBOSE) System.out.println("done");
 
     if (VERBOSE) {
@@ -91,7 +93,7 @@ public class Main extends PApplet {
     // right wall
     engine.addEntity(new Wall(WORLD_WIDTH, 0, BORDER_WALL_THICKNESS, WORLD_HEIGHT));
 
-    Player player = engine.addEntity(new Player(WORLD_WIDTH / 2f, WORLD_HEIGHT / 2f)); // add player
+    player = engine.addEntity(new Player(WORLD_WIDTH / 2f, WORLD_HEIGHT / 2f)); // add player
     engine.setCameraPos(player.position.x, player.position.y);
 
     engine.addEntity(new TargetEnemy(WORLD_WIDTH / 3f, WORLD_HEIGHT / 2f));
@@ -116,6 +118,7 @@ public class Main extends PApplet {
     }
     // setup hud
     Hud.init(this);
+    Hud.setState(Hud.State.GAMEPLAY);
     if (VERBOSE) System.out.println("done");
 
     if (VERBOSE) System.out.println("setup complete!");
@@ -131,7 +134,7 @@ public class Main extends PApplet {
     if (KInput.isActive("pause")) {
       if (paused) {
         paused = false;
-        Hud.setState(Hud.State.NONE);
+        Hud.setState(Hud.State.GAMEPLAY);
       }
       else {
         paused = true;
