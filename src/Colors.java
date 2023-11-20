@@ -1,5 +1,6 @@
 /* the color palette for this entire project - based on avianAnnihilator's Sirens at Night palette
  * (lospec.com/palette-list/sirens-at-night) with an extra shade of teal added */
+@SuppressWarnings("unused") // keeps my IDE happy
 public enum Colors {
   // original palette
   WHITE(0xffdaf2e9),

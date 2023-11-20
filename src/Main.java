@@ -122,7 +122,7 @@ public class Main extends PApplet {
     Hud.setState(Hud.State.GAMEPLAY);
     if (VERBOSE) System.out.println("done");
 
-    if (VERBOSE) System.out.println("setup complete!");
+    if (VERBOSE) System.out.println("setup complete\n\nstarting draw loop...");
   }
 
   /* draw runs once at the beginning of every frame */
@@ -155,11 +155,18 @@ public class Main extends PApplet {
     Hud.render();
   }
 
+  // override exit() to run stuff before exiting
+  @Override
+  public void exit() {
+    if (VERBOSE) System.out.println("draw loop complete\n\nshutting down...");
+    super.exit();
+  }
+
   /* input listeners */
   @Override
   public void keyPressed() {
-    // pressing escape normally just closes the program, but we can intercept it and change the key to prevent that and
-    // open a pause menu instead
+    // pressing escape normally just closes the program, but we can intercept it and change the key to prevent the
+    // auto-close and open a pause menu instead
     if (key == ESC) key = 0;
     KInput.pressKey(keyCode);
   }

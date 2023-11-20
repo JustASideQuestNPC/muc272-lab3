@@ -5,6 +5,7 @@ import processing.core.PVector;
 import static processing.core.PGraphics.*;
 
 /* an interactable button for use with the hud */
+@SuppressWarnings("unused") // keeps my IDE happy
 public class Button {
   private int x, y, width, height, strokeWeight, strokeColor, fillColor, textColor;
   private int hoveredFillColor = -1, hoveredStrokeColor = -1, hoveredTextColor = -1, hoveredStrokeWeight = -1;

@@ -16,14 +16,13 @@ public enum Weapon {
     1,
     1,
     0,
-    50
+    25
   );
 
   private final FireMode fireMode;
-  private final int roundsPerMinute;  // only used for weapon descriptions
+  // only used for weapon descriptions
   private final float secondsPerRound, secondsPerBurst; // used for timing delay between shots and bursts
   private final int muzzleVelocity;
-  private final int spreadAngle;
   private final int bulletsPerShot, shotsPerBurst;
   private final float spreadRange, halfSpreadRange;
   private final float recoilImpulse;
@@ -40,11 +39,9 @@ public enum Weapon {
   Weapon(FireMode fireMode, int roundsPerMinute, int burstsPerMinute, int muzzleVelocity, int spreadAngle,
          int bulletsPerShot, int shotsPerBurst, int recoilImpulse, int damagePerShot) {
     this.fireMode = fireMode;
-    this.roundsPerMinute = roundsPerMinute;
     secondsPerRound = 1 / (roundsPerMinute / 60f);
     secondsPerBurst = 1 / (burstsPerMinute / 60f);
     this.muzzleVelocity = muzzleVelocity;
-    this.spreadAngle = spreadAngle;
     spreadRange = (float)toRadians(spreadAngle);
     halfSpreadRange = spreadRange / 2;
     fireTimer = 0;
@@ -105,7 +102,7 @@ public enum Weapon {
     for (int i = 0; i < bulletsPerShot; ++i) {
       float fireAngle = player.aimDirection + (float)(random() * spreadRange) - halfSpreadRange;
       PVector velocity = PVector.mult(PVector.fromAngle(fireAngle), muzzleVelocity);
-      engine.addEntity(new Bullet(player.position, velocity, damagePerShot));
+      engine.addEntity(new Bullet(player.position, velocity, damagePerShot, true));
       // if the weapon has recoil, apply it to the player
       if (recoilImpulse != 0) {
         PVector impulse = PVector.mult(PVector.fromAngle(fireAngle), -recoilImpulse);
@@ -120,6 +117,7 @@ public enum Weapon {
   }
 
   /* determines what input mode is used */
+  @SuppressWarnings("unused")
   public enum FireMode {
     SEMI,
     AUTO,

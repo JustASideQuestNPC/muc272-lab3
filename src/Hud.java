@@ -104,7 +104,7 @@ public class Hud {
     if (state == State.PAUSE_MENU) {
       if (buttons.get("pause menu resume").isPressed()) {
         Main.paused = false;
-        setState(State.NONE);
+        setState(State.GAMEPLAY);
       }
       if (buttons.get("pause menu exit to desktop").isPressed()) {
         app.exit();

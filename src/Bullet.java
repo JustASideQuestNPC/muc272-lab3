@@ -9,12 +9,15 @@ public class Bullet extends KEntity {
   // many levels. i have far too much dignity to stoop that low...unlike the processing devs.
   public final int impactDamage;
 
+  private final boolean shotByPlayer; // determines what the bullet damages and if it triggers on-hit effects
+
   /* ctor */
-  Bullet(PVector position, PVector velocity, int impactDamage) {
+  Bullet(PVector position, PVector velocity, int impactDamage, boolean shotByPlayer) {
     super("bullet"); // initialize tag list
     this.position = position.copy();
     this.velocity = velocity;
     this.impactDamage = impactDamage;
+    this.shotByPlayer = shotByPlayer;
     collider = new KCollider.Hitbox(position);
   }
 
@@ -40,12 +43,21 @@ public class Bullet extends KEntity {
       }
     }
 
-    // check for collisions with enemies
-    for (KEntity enemy : engine.getTagged("enemy")) {
-      if (colliding(enemy)) {
-        enemy.damage(impactDamage);
+    // check for collisions with targets
+    if (shotByPlayer) {
+      for (KEntity enemy : engine.getTagged("enemy")) {
+        if (colliding(enemy)) {
+          enemy.damage(impactDamage);
+          Main.player.doOnHitEffects(impactDamage);
+          markForDelete = true;
+          return;
+        }
+      }
+    }
+    else {
+      if (colliding(Main.player)) {
+        Main.player.damage(impactDamage);
         markForDelete = true;
-        return;
       }
     }
   }
