@@ -1,4 +1,3 @@
-import processing.core.PGraphics;
 import processing.core.PVector;
 
 import static java.lang.Math.*;
