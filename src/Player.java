@@ -22,8 +22,6 @@ public class Player extends KEntity {
   private static final float DASH_VELOCITY = 1500;
   private static final float DASH_DURATION = 0.05f; // dash duration in seconds
   public static final float SLOW_TIME_ABILITY_DT_MULT = 0.2f;
-  private static final int BODY_COLOR = Colors.MEDIUM_TEAL.getCode();
-  private static final int AIM_LINE_COLOR = Colors.BLACK.getCode();
   public PVector position, velocity, onscreenPos;
   public float aimDirection;
   private Weapon weapon;
@@ -38,25 +36,18 @@ public class Player extends KEntity {
     velocity = new PVector(0, 0);
     // initialize collider
     collider = new KCollider.Hitbox(pos.x, pos.y, 25);
+    // initialize sprite
+    sprite = new KSprite("sprites/player-4x.png")
+        .setImageMode(3) // processing would prefer i use CENTER, but all the all-caps names are really just ints
+        .setPos(position)
+        .setAngle(aimDirection)
+        .setAngleOffset(PI / 2)
+        .setScale(0.5);
   }
 
   /* overload that takes discrete x and y coordinates */
   Player(float x, float y) {
     this(new PVector(x, y));
-  }
-
-  /* draws the player to the canvas */
-  @Override
-  public void render(PGraphics pg) {
-    pg.noStroke();
-    pg.fill(BODY_COLOR);
-    pg.ellipse(position.x, position.y, 50, 50);
-
-    pg.stroke(AIM_LINE_COLOR);
-    pg.strokeWeight(5);
-    pg.line(position.x, position.y,
-            position.x + (float)cos(aimDirection) * 25,
-            position.y + (float)sin(aimDirection) * 25);
   }
 
   /* updates the player with the current time delta */
@@ -151,6 +142,9 @@ public class Player extends KEntity {
         position.add(transVec); // offset player out of the wall
       }
     }
+
+    // update sprite position and rotation
+    sprite.setPos(position).setAngle(aimDirection);
 
     // update engine camera
     engine.setCameraTarget(position);

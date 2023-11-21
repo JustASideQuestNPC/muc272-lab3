@@ -12,6 +12,7 @@ public abstract class KEntity {
   public KCollider.Hitbox collider; // included to prevent object slicing, does not need to be initialized
   public boolean markForDelete = false;
   protected int currentHealth;
+  protected KSprite sprite;
 
   /* default ctor, intializes tags to an empty array */
   KEntity() {
@@ -23,8 +24,10 @@ public abstract class KEntity {
     this.tags = new ArrayList<>(Arrays.asList(tags));
   }
 
-  /* renders the entity to pg; does nothing by default. */
-  public void render(PGraphics pg) {}
+  /* renders the entity to pg. by default it renders the sprite if it has been created, otherwise it does nothing */
+  public void render(PGraphics pg) {
+    if (sprite != null) sprite.render(pg);
+  }
 
   /* updates the entity, is passed the time since the last update; does nothing by default. */
   public void update(float deltaTime) {}

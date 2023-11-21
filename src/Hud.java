@@ -19,8 +19,11 @@ public class Hud {
   private static final HashMap<State, String[]> buttonGroups = new HashMap<>();
   private static String[] activeButtons = new String[]{};
 
-  /* fonts */
+  /* font stuff */
+  // font objects - having a font object for each text size is generally preferred over using textSize()
   public static PFont UAV_OSD_SANS_MONO_28, UAV_OSD_SANS_MONO_14;
+  // file paths
+  public static final String UAV_OSD_SANS_MONO_PATH = "fonts/UAV-OSD-Sans-Mono.ttf";
 
   /* sets up everything */
   public static void init(Main app) {
@@ -31,8 +34,8 @@ public class Hud {
     height = app.height;
 
     // load fonts
-    UAV_OSD_SANS_MONO_28 = app.createFont("UAV-OSD-Sans-Mono.ttf", 28);
-    UAV_OSD_SANS_MONO_14 = app.createFont("UAV-OSD-Sans-Mono.ttf", 14);
+    UAV_OSD_SANS_MONO_28 = app.createFont(UAV_OSD_SANS_MONO_PATH, 28);
+    UAV_OSD_SANS_MONO_14 = app.createFont(UAV_OSD_SANS_MONO_PATH, 14);
 
     // haha builder pattern go brrr
     buttons.put("pause menu resume", new Button(pg)

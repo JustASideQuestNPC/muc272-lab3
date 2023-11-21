@@ -71,6 +71,8 @@ public class Main extends PApplet {
       System.out.print("initializing engine...");
       System.out.flush();
     }
+    // give KSprite a reference to load images with
+    KSprite.app = this;
     // set up engine
     engine = new KEngine(this);
     engine.setCameraEnabled(true);
@@ -93,11 +95,11 @@ public class Main extends PApplet {
     engine.addEntity(new Wall(-BORDER_WALL_THICKNESS, 0, BORDER_WALL_THICKNESS, WORLD_HEIGHT));
     // right wall
     engine.addEntity(new Wall(WORLD_WIDTH, 0, BORDER_WALL_THICKNESS, WORLD_HEIGHT));
+    engine.addEntity(new ChaserEnemy(WORLD_WIDTH / 3f, WORLD_HEIGHT / 2f));
 
-    player = engine.addEntity(new Player(WORLD_WIDTH / 2f, WORLD_HEIGHT / 2f)); // add player
+    // add player
+    player = engine.addEntity(new Player(WORLD_WIDTH / 2f, WORLD_HEIGHT / 2f));
     engine.setCameraPos(player.position.x, player.position.y);
-
-    engine.addEntity(new TargetEnemy(WORLD_WIDTH / 3f, WORLD_HEIGHT / 2f));
     if (VERBOSE) System.out.println("done");
 
     // setup weapons
