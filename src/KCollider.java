@@ -8,24 +8,61 @@ import static java.lang.Math.*;
 public class KCollider {
   /* collision detection interface - this really just defers to one of *many* collision detection functions.
    * It returns true if the hitboxes intersect, and false if they don't. If they do collide, the translation
-   * vector is stored in transVec (trans rights!) if it isn't null (unless the collision involves a point,
-   * in which case transVec is always (0, 0)). */
+   * vector is stored in transVec (trans rights!) if it isn't null (unless the collision involves a point or
+   * a line, in which case transVec is always (0, 0)). */
   public static boolean colliding(Hitbox h1, Hitbox h2, PVector transVec) {
     // this is messy as hell, but it's the best way I can think of to do it :/
     Shape s1 = h1.shape, s2 = h2.shape;
-    if      (s1 == Shape.POINT   && s2 == Shape.POINT  ) return pointEqualsPoint(h1, h2, transVec);
-    else if (s1 == Shape.POINT   && s2 == Shape.CIRCLE ) return pointInCircle(h1, h2, transVec);
-    else if (s1 == Shape.POINT   && s2 == Shape.POLYGON) return pointInPolygon(h1, h2, transVec);
-    else if (s1 == Shape.CIRCLE  && s2 == Shape.POINT  ) return pointInCircle(h2, h1, transVec);
-    else if (s1 == Shape.CIRCLE  && s2 == Shape.CIRCLE ) return circleToCircleCollide(h1, h2, transVec);
-    else if (s1 == Shape.CIRCLE  && s2 == Shape.POLYGON) return circleToPolygonCollide(h1, h2, transVec, false);
-    else if (s1 == Shape.POLYGON && s2 == Shape.POINT  ) return pointInPolygon(h2, h1, transVec);
-    else if (s1 == Shape.POLYGON && s2 == Shape.CIRCLE ) return circleToPolygonCollide(h2, h1, transVec, true);
-    else if (s1 == Shape.POLYGON && s2 == Shape.POLYGON) return polygonToPolygonCollide(h1, h2, transVec);
-
-    // dummy return to make this compile (not including this wouldn't cause any bugs in practice, but the compiler
-    // would still throw an error because in theory this could cause an error)
-    return false;
+    if (s1 == Shape.POINT && s2 == Shape.POINT) {
+      return pointEqualsPoint(h1, h2, transVec);
+    }
+    else if (s1 == Shape.POINT && s2 == Shape.CIRCLE) {
+      return pointInCircle(h1, h2, transVec);
+    }
+    else if (s1 == Shape.POINT && s2 == Shape.POLYGON) {
+      return pointInPolygon(h1, h2, transVec);
+    }
+    else if (s1 == Shape.POINT && s2 == Shape.LINE) {
+      return pointOnLine(h1, h2, transVec);
+    }
+    else if (s1 == Shape.CIRCLE && s2 == Shape.POINT) {
+      return pointInCircle(h2, h1, transVec);
+    }
+    else if (s1 == Shape.CIRCLE && s2 == Shape.CIRCLE) {
+      return circleToCircleCollide(h1, h2, transVec);
+    }
+    else if (s1 == Shape.CIRCLE && s2 == Shape.POLYGON) {
+      return circleToPolygonCollide(h1, h2, transVec, false);
+    }
+    else if (s1 == Shape.CIRCLE && s2 == Shape.LINE) {
+      if(transVec != null) transVec.set(0, 0);
+      return lineInCircle(h2.start, h2.end, h1.position, h1.radius, new PVector());
+    }
+    else if (s1 == Shape.POLYGON && s2 == Shape.POINT) {
+      return pointInPolygon(h2, h1, transVec);
+    }
+    else if (s1 == Shape.POLYGON && s2 == Shape.CIRCLE) {
+      return circleToPolygonCollide(h2, h1, transVec, true);
+    }
+    else if (s1 == Shape.POLYGON && s2 == Shape.POLYGON) {
+      return polygonToPolygonCollide(h1, h2, transVec);
+    }
+    else if (s1 == Shape.POLYGON && s2 == Shape.LINE) {
+      return lineInPolygon(h2, h1, transVec);
+    }
+    else if (s1 == Shape.LINE && s2 == Shape.POINT) {
+      return pointOnLine(h2, h1, transVec);
+    }
+    else if (s1 == Shape.LINE && s2 == Shape.CIRCLE) {
+      if(transVec != null) transVec.set(0, 0);
+      return lineInCircle(h1.start, h1.end, h2.position, h2.radius, new PVector());
+    }
+    else if (s1 == Shape.LINE && s2 == Shape.POLYGON) {
+      return lineInPolygon(h1, h2, transVec);
+    }
+    else {
+      return lineIntersection(h1, h2, transVec);
+    }
   }
   // overload to make transVec optional
   public static boolean colliding(Hitbox h1, Hitbox h2) {
@@ -167,33 +204,27 @@ public class KCollider {
       }
     }
 
-    if (inside && transVec != null) transVec.set(0, 0);
+    if (transVec != null) transVec.set(0, 0);
     return inside;
   }
 
   // returns whether a point is inside a circle
   public static boolean pointInCircle(Hitbox point, Hitbox circle, PVector transVec) {
-    if (PVector.sub(point.position, circle.position).magSq() < circle.radiusSquared) {
-      if (transVec != null) transVec.set(0, 0);
-      return true;
-    }
-    return false;
+    if (transVec != null) transVec.set(0, 0);
+    return PVector.sub(point.position, circle.position).magSq() < circle.radiusSquared;
   }
 
   // returns whether two points are at the same integer coordinates - this is really only here for completeness and
   // will probably never be used
   public static boolean pointEqualsPoint(Hitbox p1, Hitbox p2, PVector transVec) {
-    if ((int)p1.position.x == (int)p2.position.x && (int)p1.position.y == (int)p2.position.y) {
-      if (transVec != null) transVec.set(0, 0);
-      return true;
-    }
-    return false;
+    if (transVec != null) transVec.set(0, 0);
+    return (int)p1.position.x == (int)p2.position.x && (int)p1.position.y == (int)p2.position.y;
   }
 
   /* unified class that handles all collisions and can be any shape */
   public static class Hitbox {
     public final Shape shape;
-    public PVector position;
+    public PVector position, start, end;
     public float radius, radiusSquared;
     public BoundingRect bbox, absoluteBBox;
     public PVector[] points, absolutePoints;
@@ -230,6 +261,13 @@ public class KCollider {
       this(new float[][]{{0, 0}, {w, 0}, {w, h}, {0, h}}, x, y);
     }
 
+    // line ctor - this requires PVectors because the rect ctor overlaps it
+    Hitbox(PVector start, PVector end) {
+      shape = Shape.LINE;
+      this.start = start;
+      this.end = end;
+    }
+
     // overloads that take PVectors
     Hitbox(PVector pos) {
       this(pos.x, pos.y);
@@ -258,7 +296,8 @@ public class KCollider {
       setPos(pos);
     }
 
-    // sets the hitbox's position relative to the origin
+    // sets the hitbox's position relative to the origin - if the hitbox is a line, the start point (the first point
+    // in to the ctor) will be the moved to the new position
     public void setPos(float x, float y) {
       switch (shape) {
         case POINT:
@@ -277,6 +316,11 @@ public class KCollider {
           // also move the bounding box
           bbox.x = absoluteBBox.x + x;
           bbox.y = absoluteBBox.y + y;
+          break;
+        case LINE:
+          PVector delta = PVector.sub(end, start);
+          start.set(x, y);
+          end.set(PVector.add(start, delta));
       }
     }
     public void setPos(PVector vec) {
@@ -305,13 +349,19 @@ public class KCollider {
           // also move the bounding box
           bbox.x += x;
           bbox.y += y;
+          break;
+        case LINE:
+          start.x += x;
+          start.y += y;
+          end.x += x;
+          end.y += y;
       }
     }
     public void modPos(PVector vec) {
       modPos(vec.x, vec.y);
     }
 
-    // used to overload the polygon constructor
+    // used to overload the polygon ctor
     private void init(float[][] pts) throws IllegalArgumentException {
       // throw an exception if the polygon has less than three points
       if (pts.length < 3) {
@@ -428,6 +478,7 @@ public class KCollider {
     PVector atp = PVector.sub(cPos, a);
     PVector atb = PVector.sub(b, a);
     float t = PApplet.constrain(PVector.dot(atp, atb) / atb.magSq(), 0, 1);
+
     closest.set(
         a.x + atb.x * t,
         a.y + atb.y * t
@@ -437,10 +488,46 @@ public class KCollider {
     return PVector.sub(closest, cPos).magSq() <= pow(r, 2);
   }
 
+  // returns whether or not a line intersects a polygon
+  public static boolean lineInPolygon(Hitbox line, Hitbox poly, PVector transVec) {
+    if (transVec != null) transVec.set(0, 0);
+
+    // loop through each edge of the polygon and check if the line intersects one of them
+    for (int i = 0, j = poly.points.length - 1; i < poly.points.length; j = i++) {
+      if (lineIntersection(poly.points[i], poly.points[j], line.start, line.end)) return true;
+    }
+    return false;
+  }
+
+  // returns whether or not two lines intersect
+  public static boolean lineIntersection(PVector p0, PVector p1, PVector p2, PVector p3) {
+    PVector d1 = PVector.sub(p1, p0);
+    PVector d2 = PVector.sub(p3, p2);
+
+    float s = (-d1.y * (p0.x - p2.x) + d1.x * (p0.y - p2.y)) / (-d2.x * d1.y + d1.x * d2.y);
+    float t = ( d2.x * (p0.y - p2.y) - d2.y * (p0.x - p2.x)) / (-d2.x * d1.y + d1.x * d2.y);
+
+    return (s >= 0 && s <= 1 && t >= 0 && t <= 1);
+  }
+  // overload that takes hitboxes and a translation vector
+  public static boolean lineIntersection(Hitbox l1, Hitbox l2, PVector transVec) {
+    if (transVec != null) transVec.set(0, 0);
+    return lineIntersection(l1.start, l1.end, l2.start, l2.end);
+  }
+
+  // returns whether or not a point is on a line
+  public static boolean pointOnLine(Hitbox point, Hitbox line, PVector transVec) {
+    float d1 = PVector.dist(line.start, point.position);
+    float d2 = PVector.dist(line.end, point.position);
+    if (transVec != null) transVec.set(0, 0);
+    return d1 + d2 == PVector.dist(line.start, line.end);
+  }
+
   // collider shapes
   public enum Shape {
     POINT,
     CIRCLE,
-    POLYGON
+    POLYGON,
+    LINE
   }
 }

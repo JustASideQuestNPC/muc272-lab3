@@ -66,7 +66,6 @@ public class Main extends PApplet {
     KInput.addInput("dash", Key.SPACEBAR, KInput.BindMode.PRESS_ONLY);
     KInput.addInput("slow time", Key.SHIFT);
     if (VERBOSE) System.out.println("done");
-
     if (VERBOSE) {
       System.out.print("initializing engine...");
       System.out.flush();

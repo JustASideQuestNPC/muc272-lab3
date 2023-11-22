@@ -7,9 +7,9 @@ public class Player extends KEntity {
   // velocity has two caps, the soft cap and the hard cap. the soft cap is effectively the player's base movement speed,
   // and directional inputs have no effect if velocity is higher than it. other sources such as dashing can increase the
   // player's velocity above the soft cap, but not above the hard cap.
-  private static final float VELOCITY_SOFT_CAP = 750, VELOCITY_HARD_CAP = 1500;
+  private static final float VELOCITY_SOFT_CAP = 750, VELOCITY_HARD_CAP = 1500; // pixels per second
   private static final float MOVE_ACCELERATION = 3000, FRICTION = 1500;
-  private static final float HIGH_SPEED_FRICTION_MULT = 2f; // increased friction when above the soft speed cap
+  private static final float HIGH_SPEED_FRICTION_MULT = 2f; // increases friction when above the soft speed cap
   private static final float VELOCITY_SOFT_CAP_SQ = VELOCITY_SOFT_CAP * VELOCITY_SOFT_CAP; // used during updates
   private static final float VELOCITY_HARD_CAP_SQ = VELOCITY_HARD_CAP * VELOCITY_HARD_CAP;
   public static final int MAX_STAMINA = 1000;

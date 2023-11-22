@@ -18,7 +18,7 @@ public class Bullet extends KEntity {
     this.velocity = velocity;
     this.impactDamage = impactDamage;
     this.shotByPlayer = shotByPlayer;
-    collider = new KCollider.Hitbox(position);
+    collider = new KCollider.Hitbox(position.copy(), new PVector(0, 0));
   }
 
   /* draws the bullet to the canvas */
@@ -32,8 +32,11 @@ public class Bullet extends KEntity {
   /* updates position and velocity, then runs collision checks */
   @Override
   public void update(float dt) {
+    // update collider - bullets use a line instead of a point to prevent them from being on one side
+    // of an enemy on one frame, and on the other side of them on the next
+    collider.start.set(position);
     position.add(PVector.mult(velocity, dt));
-    setColliderPos(position);
+    collider.end.set(position);
 
     // check for collisions with walls
     for (KEntity wall : engine.getTagged("wall")) {
