@@ -5,8 +5,10 @@ import java.util.function.Function;
 import static java.lang.Math.random;
 
 /* invisible entity that spawns enemies */
-public class EnemyManager extends KEntity {
+public class EnemyManager extends GameEntity {
   EnemyManager() {
+    // "purge exempt" ensures the manager will be in the engine for all of runtime
+    super("purge exempt");
     // hard-coded wave info for debugging
     EnemyType.CHASER.setNumInWave(Integer.MAX_VALUE);
     EnemyType.CHASER.setMaxActive(1);
@@ -26,16 +28,15 @@ public class EnemyManager extends KEntity {
         0.5f
     );
 
-
     private int numInWave; // how many of the enemy are left in the current wave
     private int numActive; // how many of the enemy are currently active in the engine
     private int maxActive; // how many of the enemy can be active in the engine at once
     private final int minSpawnX, minSpawnY, maxSpawnX, maxSpawnY; // used to prevent enemies from spawning inside walls
-    private final Function<PVector, KEntity> enemyCtor; // the constructor for the enemy type
+    private final Function<PVector, GameEntity> enemyCtor; // the constructor for the enemy type
     private final float spawnInterval; // minimum time between entity spawns, in seconds
     private float spawnTimer;
 
-    EnemyType(Function<PVector, KEntity> enemyCtor, int worldBorderMargin, float spawnInterval) {
+    EnemyType(Function<PVector, GameEntity> enemyCtor, int worldBorderMargin, float spawnInterval) {
       this.enemyCtor = enemyCtor;
       minSpawnX = worldBorderMargin;
       minSpawnY = worldBorderMargin;

@@ -6,15 +6,15 @@ import java.util.Arrays;
 
 /* template class for entities in a game engine */
 @SuppressWarnings("unused") // keeps my ide happy
-public abstract class KEntity {
+public abstract class GameEntity {
   protected final ArrayList<String> tags; // tags, can be used for almost anything
-  public KEngine engine; // the engine containing the entity
+  public Engine engine; // the engine containing the entity
   public EnemyManager enemyManager; // used if the entity is an enemy for keeping entity limits correct
-  public KCollider.Hitbox[] colliders; // included to prevent object slicing, does not need to be initialized
+  public Collider.Hitbox[] colliders; // included to prevent object slicing, does not need to be initialized
   public boolean markForDelete = false;
-  public PVector position;
+  public PVector position = new PVector(0, 0);
   protected float currentHealth;
-  protected KSprite sprite;
+  protected Sprite sprite;
 
   /* constants for debugging */
   public static boolean SHOW_COLLIDERS = false;
@@ -22,12 +22,12 @@ public abstract class KEntity {
   private static final int COLLIDER_STROKE_WEIGHT = 2;
 
   /* default ctor, intializes tags to an empty array */
-  KEntity() {
+  GameEntity() {
     tags = new ArrayList<>();
   }
 
   /* ctor with tags */
-  KEntity(String... tags) {
+  GameEntity(String... tags) {
     this.tags = new ArrayList<>(Arrays.asList(tags));
   }
 
@@ -35,7 +35,7 @@ public abstract class KEntity {
   public void render(PGraphics pg) {
     if (sprite != null) sprite.render(pg);
     if (SHOW_COLLIDERS && colliders != null) {
-      for (KCollider.Hitbox collider : colliders) collider.render(pg, COLLIDER_COLOR, COLLIDER_STROKE_WEIGHT);
+      for (Collider.Hitbox collider : colliders) collider.render(pg, COLLIDER_COLOR, COLLIDER_STROKE_WEIGHT);
     }
   }
 
@@ -47,20 +47,20 @@ public abstract class KEntity {
     return tags.contains(tag);
   }
 
-  public final boolean colliding(KEntity other, PVector transVec) {
+  public final boolean colliding(GameEntity other, PVector transVec) {
     if (this.colliders != null && other.colliders != null) {
-      for (KCollider.Hitbox thisCollider : this.colliders) {
-        for (KCollider.Hitbox otherCollider : other.colliders) {
-          if (KCollider.colliding(thisCollider, otherCollider, transVec)) return true;
+      for (Collider.Hitbox thisCollider : this.colliders) {
+        for (Collider.Hitbox otherCollider : other.colliders) {
+          if (Collider.colliding(thisCollider, otherCollider, transVec)) return true;
         }
       }
     }
     return false;
   }
-  public final boolean colliding(KEntity other) {
-    for (KCollider.Hitbox thisCollider : this.colliders) {
-      for (KCollider.Hitbox otherCollider : other.colliders) {
-        if (KCollider.colliding(thisCollider, otherCollider)) return true;
+  public final boolean colliding(GameEntity other) {
+    for (Collider.Hitbox thisCollider : this.colliders) {
+      for (Collider.Hitbox otherCollider : other.colliders) {
+        if (Collider.colliding(thisCollider, otherCollider)) return true;
       }
     }
     return false;
@@ -68,7 +68,7 @@ public abstract class KEntity {
 
   public final void setColliderPos(PVector pos) {
     if (this.colliders != null) {
-      for (KCollider.Hitbox collider : colliders) {
+      for (Collider.Hitbox collider : colliders) {
         collider.setPos(pos);
       }
     }
@@ -76,7 +76,7 @@ public abstract class KEntity {
 
   public final void setColliderAngle(float angle) {
     if (this.colliders != null) {
-      for (KCollider.Hitbox collider : colliders) {
+      for (Collider.Hitbox collider : colliders) {
         collider.setAngle(angle);
       }
     }
@@ -94,4 +94,11 @@ public abstract class KEntity {
 
   /* runs once when the entity is deleted by the engine; does nothing by default */
   public void runOnDeath() {}
+
+  /* returns whether the entity is onscreen, almost certainly produces some false negatives */
+  public final boolean isOnscreen() {
+    PVector onscreenPos = PVector.add(PVector.sub(position, engine.getCameraPos()), engine.getCameraOffset());
+    return onscreenPos.x > 0 && onscreenPos.x < Main.WINDOW_WIDTH
+        && onscreenPos.y > 0 && onscreenPos.y < Main.WINDOW_HEIGHT;
+  }
 }

@@ -4,7 +4,7 @@ import processing.core.PVector;
 import java.util.HashMap;
 
 @SuppressWarnings("unused") // keeps my IDE happy
-public class KInput {
+public class Input {
 
   // holds all input bindings - hashmaps are like arrays, but they use another value as a key, instead of an index (in
   // this case a string, so that accessing a bind with a given name is super easy)

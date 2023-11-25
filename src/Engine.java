@@ -6,8 +6,8 @@ import java.util.ArrayList;
 
 /* handles rendering and updates for player, enemies, bullets, etc. */
 @SuppressWarnings("unused") // keeps my ide happy
-public final class KEngine {
-  private final ArrayList<KEntity> entities; // holds all entities
+public final class Engine {
+  private final ArrayList<GameEntity> entities; // holds all entities
   private final PGraphics canvas; // all entities are drawn to this
   private long currentTime;
   private float dt; // delta time (time since last frame)
@@ -68,20 +68,20 @@ public final class KEngine {
   }
 
   /* ctors */
-  KEngine(PGraphics pg) {
+  Engine(PGraphics pg) {
     entities = new ArrayList<>();
     canvas = pg;
     // start timer for tracking time delta
     currentTime = System.nanoTime();
   }
 
-  KEngine(PApplet app) {
+  Engine(PApplet app) {
     this(app.getGraphics());
   }
 
   /* adds an entity to the entity list, then returns a reference to that entity */
   @SuppressWarnings("UnusedReturnValue") // keeps my ide happy
-  public <T extends KEntity> T addEntity(T entity) {
+  public <T extends GameEntity> T addEntity(T entity) {
     entity.engine = this; // all entities have a reference to the engine that contains them
     entities.add(entity);
     return entity;
@@ -106,7 +106,7 @@ public final class KEngine {
         color1 = !color1;
       }
     }
-    for (KEntity ent : entities) {
+    for (GameEntity ent : entities) {
       ent.render(canvas);
     }
     canvas.popMatrix();
@@ -122,7 +122,7 @@ public final class KEngine {
     // update all entities
     //noinspection ForLoopReplaceableByForEach
     for (int i = 0; i < entities.size(); ++i) {
-      KEntity ent = entities.get(i);
+      GameEntity ent = entities.get(i);
       if (ent.hasTag("dt mult exempt")) ent.update(dt);
       else if (dtMult != 0) ent.update(dt * dtMult);
     }
@@ -161,9 +161,9 @@ public final class KEngine {
   }
 
   /* returns all entities with the given tag (if there are no entities with that tag, returns an empty list) */
-  public ArrayList<KEntity> getTagged(String tag) {
-    ArrayList<KEntity> tagged = new ArrayList<>();
-    for (KEntity ent : entities) {
+  public ArrayList<GameEntity> getTagged(String tag) {
+    ArrayList<GameEntity> tagged = new ArrayList<>();
+    for (GameEntity ent : entities) {
       if (ent.hasTag(tag)) tagged.add(ent);
     }
     return tagged;
@@ -187,5 +187,14 @@ public final class KEngine {
   /* moves the camera toward the target based on the camera's tightness */
   private void updateCamera() {
     cameraPos.set(PVector.lerp(cameraPos, cameraTarget, cameraTightness));
+  }
+
+  /* removes all entities from the entity list. if force is false, entities with the "purge exempt" tag are ignored. */
+  public void purge(boolean force) {
+    if (force) entities.clear();
+    else entities.removeIf((ent) -> ent.hasTag("purge exempt"));
+  }
+  public void purge() {
+    purge(false);
   }
 }

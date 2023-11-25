@@ -51,10 +51,10 @@ public enum Weapon {
 
     // set input checker based on firemode
     if (this.fireMode == FireMode.AUTO) {
-      inputChecker = () -> KInput.isActive("fire auto");
+      inputChecker = () -> Input.isActive("fire auto");
     }
     else {
-      inputChecker = () -> KInput.isActive("fire semi");
+      inputChecker = () -> Input.isActive("fire semi");
     }
   }
 

@@ -3,7 +3,7 @@ import processing.core.PVector;
 import static java.lang.Math.*;
 
 /* the player, obviously */
-public class Player extends KEntity {
+public class Player extends GameEntity {
   // velocity has two caps, the soft cap and the hard cap. the soft cap is effectively the player's base movement speed,
   // and directional inputs have no effect if velocity is higher than it. other sources such as dashing can increase the
   // player's velocity above the soft cap, but not above the hard cap.
@@ -39,8 +39,8 @@ public class Player extends KEntity {
     this.position = position.copy();
     velocity = new PVector(0, 0);
     // initialize collider
-    colliders = new KCollider.Hitbox[]{
-        new KCollider.Hitbox(new float[][]{
+    colliders = new Collider.Hitbox[]{
+        new Collider.Hitbox(new float[][]{
             {-18, -26},
             {-18,  -5},
             {-22,  29},
@@ -49,7 +49,7 @@ public class Player extends KEntity {
             {-40, -12},
             {-28, -26}
         }, position),
-        new KCollider.Hitbox(new float[][]{
+        new Collider.Hitbox(new float[][]{
             { 18, -26},
             { 18,  -5},
             { 22,  29},
@@ -58,25 +58,25 @@ public class Player extends KEntity {
             { 40, -12},
             { 28, -26}
         }, position),
-        new KCollider.Hitbox(new float[][]{
+        new Collider.Hitbox(new float[][]{
             {-18,  -4},
             {-14,   1},
             {-16,  19},
             {-22,  29}
         }, position),
-        new KCollider.Hitbox(new float[][]{
+        new Collider.Hitbox(new float[][]{
             { 18,  -4},
             { 14,   1},
             { 16,  19},
             { 22,  29}
         }, position),
-        new KCollider.Hitbox(new float[][]{
+        new Collider.Hitbox(new float[][]{
             {-10,   1},
             { -4, -11},
             {  4, -11},
             { 10,   1}
         }, position),
-        new KCollider.Hitbox(new float[][]{
+        new Collider.Hitbox(new float[][]{
             {-16,  19},
             {-14,   1},
             { 14,   1},
@@ -84,8 +84,8 @@ public class Player extends KEntity {
         }, position)
     };
     // initialize sprite
-    sprite = new KSprite("sprites/player-4x.png")
-        .setDisplayAnchor(KSprite.DisplayAnchor.CENTER)
+    sprite = new Sprite("sprites/player-4x.png")
+        .setDisplayAnchor(Sprite.DisplayAnchor.CENTER)
         .setAngle(aimDirection)
         .setAngleOffset(PI / 2)
         .setScale(0.5);
@@ -107,15 +107,15 @@ public class Player extends KEntity {
     else {
       // convert directional keys into a single vector with the movement direction
       PVector moveInput = new PVector(0, 0);
-      if (KInput.isActive("move up")) --moveInput.y;
-      if (KInput.isActive("move down")) ++moveInput.y;
-      if (KInput.isActive("move left")) --moveInput.x;
-      if (KInput.isActive("move right")) ++moveInput.x;
+      if (Input.isActive("move up")) --moveInput.y;
+      if (Input.isActive("move down")) ++moveInput.y;
+      if (Input.isActive("move left")) --moveInput.x;
+      if (Input.isActive("move right")) ++moveInput.x;
 
       // check for a dash input if the player has enough stamina
       if (currentStamina >= DASH_STAMINA_COST) {
         // start a dash if the dash key and at least one movement key is pressed
-        if (KInput.isActive("dash") && moveInput.magSq() != 0) {
+        if (Input.isActive("dash") && moveInput.magSq() != 0) {
           dashMovementTimer = DASH_DURATION;
           currentStamina -= DASH_STAMINA_COST;
           // align velocity to the move input and scale it to dash velocity
@@ -147,7 +147,7 @@ public class Player extends KEntity {
     }
 
     passiveStaminaRegenAllowed = true;
-    if (KInput.isActive("slow time") && currentStamina > 0) {
+    if (Input.isActive("slow time") && currentStamina > 0) {
       engine.setDtMult(SLOW_TIME_ABILITY_DT_MULT);
       currentStamina -= SLOW_TIME_STAMINA_COST * dt;
       passiveStaminaRegenAllowed = false;
@@ -174,14 +174,14 @@ public class Player extends KEntity {
     onscreenPos = PVector.add(PVector.sub(position, engine.getCameraPos()), engine.getCameraOffset());
 
     // update aim angle and fire weapon
-    aimDirection = (float)atan2(KInput.mousePos.y - onscreenPos.y, KInput.mousePos.x - onscreenPos.x);
+    aimDirection = (float)atan2(Input.mousePos.y - onscreenPos.y, Input.mousePos.x - onscreenPos.x);
     weapon.doFireCheck();
 
     setColliderPos(position);
     setColliderAngle(aimDirection + (float)(PI / 2));
 
     // do collision checks
-    for (KEntity wall : engine.getTagged("wall")) {
+    for (GameEntity wall : engine.getTagged("wall")) {
       PVector transVec = new PVector();
       if (colliding(wall, transVec)) {
         // determine which component of the velocity to 0 out

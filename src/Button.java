@@ -162,9 +162,9 @@ public class Button {
 
   /* updates the button */
   public void update() {
-    PVector mpos = KInput.mousePos;
+    PVector mpos = Input.mousePos;
     hovered = mpos.x >= x && mpos.x <= x + width && mpos.y >= y && mpos.y <= y + height;
-    pressed = KInput.getKeyState(Key.LEFT_MOUSE) && hovered;
+    pressed = Input.getKeyState(Key.LEFT_MOUSE) && hovered;
   }
 
   public boolean isHovered() {

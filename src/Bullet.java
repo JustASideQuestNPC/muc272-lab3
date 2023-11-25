@@ -2,7 +2,7 @@ import processing.core.PGraphics;
 import processing.core.PVector;
 
 /* bullet fired by player weapons */
-public class Bullet extends KEntity {
+public class Bullet extends GameEntity {
   public PVector velocity;
 
   // yes, i'm aware that i could name this "damage", but having a variable with the same name as a method is wrong on so
@@ -18,7 +18,7 @@ public class Bullet extends KEntity {
     this.velocity = velocity;
     this.impactDamage = impactDamage;
     this.shotByPlayer = shotByPlayer;
-    colliders = new KCollider.Hitbox[]{new KCollider.Hitbox(position.copy(), new PVector(0, 0))};
+    colliders = new Collider.Hitbox[]{new Collider.Hitbox(position.copy(), new PVector(0, 0))};
   }
 
   /* draws the bullet to the canvas */
@@ -40,7 +40,7 @@ public class Bullet extends KEntity {
     colliders[0].end.set(position);
 
     // check for collisions with walls
-    for (KEntity wall : engine.getTagged("wall")) {
+    for (GameEntity wall : engine.getTagged("wall")) {
       if (colliding(wall)) {
         markForDelete = true;
         return; // return ends the update early and prevents a bunch of unnecessary collision checks
@@ -49,7 +49,7 @@ public class Bullet extends KEntity {
 
     // check for collisions with targets
     if (shotByPlayer) {
-      for (KEntity enemy : engine.getTagged("enemy")) {
+      for (GameEntity enemy : engine.getTagged("enemy")) {
         if (colliding(enemy)) {
           enemy.damage(impactDamage);
           Main.player.doOnHitEffects(impactDamage);

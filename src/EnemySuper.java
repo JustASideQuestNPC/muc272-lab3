@@ -1,8 +1,7 @@
 import processing.core.PGraphics;
-import processing.core.PVector;
 
 /* superclass that all enemies inherit from - currently kind of unnecessary but will become more useful later */
-public abstract class EnemySuper extends KEntity {
+public abstract class EnemySuper extends GameEntity {
   private final int HEALTHBAR_CURRENT_COLOR = Colors.RED.getCode();
   private final int HEALTHBAR_MAX_COLOR = Colors.DARK_RED.getCode();
 

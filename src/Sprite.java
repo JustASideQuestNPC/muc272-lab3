@@ -3,36 +3,36 @@ import processing.core.PImage;
 import processing.core.PVector;
 
 /* handles displaying and rotating an image sprite */
-public class KSprite {
+public class Sprite {
   public static Main app;
   private final PImage image;
   private DisplayAnchor displayAnchor = DisplayAnchor.TOP_LEFT;
   private float x, y, xOffset, yOffset, width, height, angle, angleOffset;
 
   /* ctor, takes the path to the image */
-  KSprite(String imagePath) {
+  Sprite(String imagePath) {
     image = app.loadImage(imagePath);
     width = image.width;
     height = image.height;
   }
 
   /* builder pattern setters */
-  public KSprite setPos(float x, float y) {
+  public Sprite setPos(float x, float y) {
     this.x = x;
     this.y = y;
     return this;
   }
   // overload that takes a PVector
-  public KSprite setPos(PVector pos) {
+  public Sprite setPos(PVector pos) {
     return setPos(pos.x, pos.y);
   }
-  public KSprite setSize(float width, float height) {
+  public Sprite setSize(float width, float height) {
     this.width = width;
     this.height = height;
     setDisplayAnchor(displayAnchor);
     return this;
   }
-  public KSprite setDisplayAnchor(DisplayAnchor displayAnchor) {
+  public Sprite setDisplayAnchor(DisplayAnchor displayAnchor) {
     this.displayAnchor = displayAnchor;
     switch (displayAnchor) {
       case TOP:
@@ -73,24 +73,24 @@ public class KSprite {
     }
     return this;
   }
-  public KSprite setAngle(float angle) {
+  public Sprite setAngle(float angle) {
     this.angle = angle;
     return this;
   }
-  public KSprite setAngleOffset(float angleOffset) {
+  public Sprite setAngleOffset(float angleOffset) {
     this.angleOffset = angleOffset;
     return this;
   }
   // overload that takes a double to keep things clean
-  public KSprite setAngleOffset(double angleOffset) {
+  public Sprite setAngleOffset(double angleOffset) {
     return setAngleOffset((float)angleOffset);
   }
   // scales based on the size of the image, *not* the current size setting
-  public KSprite setScale(float scale) {
+  public Sprite setScale(float scale) {
     return setSize(image.width * scale, image.height * scale);
   }
   // overload that takes a double to keep code in other files clean
-  public KSprite setScale(double scale) {
+  public Sprite setScale(double scale) {
     return setScale((float)scale);
   }
 

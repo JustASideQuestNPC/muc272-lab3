@@ -6,7 +6,7 @@ import static java.lang.Math.*;
 
 /* handles 2d collisions for points, circles, and polygons */
 @SuppressWarnings("unused") // keeps my IDE happy
-public class KCollider {
+public class Collider {
   /* collision detection interface - this really just defers to one of *many* collision detection functions.
    * It returns true if the hitboxes intersect, and false if they don't. If they do collide, the translation
    * vector is stored in transVec (trans rights!) if it isn't null (unless the collision involves a point or
@@ -397,7 +397,7 @@ public class KCollider {
             (float)sin(angle + pointsAsPolar[i][0]) * pointsAsPolar[i][1]
         );
       }
-      rotatedBBox = KCollider.findBBox(this);
+      rotatedBBox = Collider.findBBox(this);
       setPos(position.x, position.y);
     }
 
@@ -422,7 +422,7 @@ public class KCollider {
         };
       }
 
-      rotatedBBox = KCollider.findBBox(this);
+      rotatedBBox = Collider.findBBox(this);
       bbox = new BoundingRect(rotatedBBox);
     }
   }

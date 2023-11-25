@@ -19,7 +19,7 @@ public class ChaserEnemy extends EnemySuper {
     currentHealth = MAX_HEALTH;
     this.position = position.copy();
     // initialize collider
-    colliders = new KCollider.Hitbox[]{new KCollider.Hitbox(new float[][]{
+    colliders = new Collider.Hitbox[]{new Collider.Hitbox(new float[][]{
         {6, -27},
         {20, -3},
         {20, 19},
@@ -30,8 +30,8 @@ public class ChaserEnemy extends EnemySuper {
         {-6, -27}
     }, position)};
     // setup sprite
-    sprite = new KSprite("sprites/chaser-4x.png")
-        .setDisplayAnchor(KSprite.DisplayAnchor.CENTER)
+    sprite = new Sprite("sprites/chaser-4x.png")
+        .setDisplayAnchor(Sprite.DisplayAnchor.CENTER)
         .setPos(position)
         .setAngle(angle)
         .setAngleOffset(PI / 2)
@@ -77,7 +77,7 @@ public class ChaserEnemy extends EnemySuper {
     setColliderAngle((float)(angle + PI / 2));
 
     // check for collisions with walls
-    for (KEntity wall : engine.getTagged("wall")) {
+    for (GameEntity wall : engine.getTagged("wall")) {
       if (colliding(wall)) {
         markForDelete = true;
         return;
