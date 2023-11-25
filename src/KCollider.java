@@ -1,4 +1,5 @@
 import processing.core.PApplet;
+import processing.core.PGraphics;
 import processing.core.PVector;
 
 import static java.lang.Math.*;
@@ -224,10 +225,11 @@ public class KCollider {
   /* unified class that handles all collisions and can be any shape */
   public static class Hitbox {
     public final Shape shape;
-    public PVector position, start, end;
+    public PVector position = new PVector(0, 0), start, end;
     public float radius, radiusSquared;
-    public BoundingRect bbox, absoluteBBox;
-    public PVector[] points, absolutePoints;
+    public BoundingRect bbox, rotatedBBox;
+    public PVector[] points, absolutePoints, rotatedPoints;
+    public float[][] pointsAsPolar;
 
     // point ctor
     Hitbox(float x, float y) {
@@ -296,6 +298,30 @@ public class KCollider {
       setPos(pos);
     }
 
+    // renders the hitbox to a PGraphics canvas with the specified color and stroke weight; useful for debugging
+    public void render(PGraphics pg, int color, int strokeWeight) {
+      pg.pushStyle();
+      pg.noFill();
+      pg.stroke(color);
+      pg.strokeWeight(strokeWeight);
+      switch(shape) {
+        case POINT:
+          pg.point(position.x, position.y);
+          break;
+        case CIRCLE:
+          pg.ellipse(position.x, position.y, radius * 2, radius * 2);
+          break;
+        case POLYGON:
+          pg.beginShape();
+          for (PVector vert : points) pg.vertex(vert.x, vert.y);
+          pg.endShape(2); // 2 = CLOSE
+          break;
+        case LINE:
+          pg.line(start.x, start.y, end.x, end.y);
+      }
+      pg.popStyle();
+    }
+
     // sets the hitbox's position relative to the origin - if the hitbox is a line, the start point (the first point
     // in to the ctor) will be the moved to the new position
     public void setPos(float x, float y) {
@@ -309,13 +335,14 @@ public class KCollider {
           bbox.y = y - radius;
           break;
         case POLYGON:
-          for (int i = 0; i < absolutePoints.length; ++i) {
-            points[i].set(absolutePoints[i].x + x, absolutePoints[i].y + y);
+          position.set(x, y);
+          for (int i = 0; i < rotatedPoints.length; ++i) {
+            points[i].set(rotatedPoints[i].x + x, rotatedPoints[i].y + y);
           }
 
           // also move the bounding box
-          bbox.x = absoluteBBox.x + x;
-          bbox.y = absoluteBBox.y + y;
+          bbox.x = rotatedBBox.x + x;
+          bbox.y = rotatedBBox.y + y;
           break;
         case LINE:
           PVector delta = PVector.sub(end, start);
@@ -361,6 +388,19 @@ public class KCollider {
       modPos(vec.x, vec.y);
     }
 
+    // rotates a polygon collider to an angle in radians; has no effect on other shapes
+    public void setAngle(float angle) {
+      if (shape != Shape.POLYGON) return;
+      for (int i = 0; i < rotatedPoints.length; ++i) {
+        rotatedPoints[i].set(
+            (float)cos(angle + pointsAsPolar[i][0]) * pointsAsPolar[i][1],
+            (float)sin(angle + pointsAsPolar[i][0]) * pointsAsPolar[i][1]
+        );
+      }
+      rotatedBBox = KCollider.findBBox(this);
+      setPos(position.x, position.y);
+    }
+
     // used to overload the polygon ctor
     private void init(float[][] pts) throws IllegalArgumentException {
       // throw an exception if the polygon has less than three points
@@ -369,16 +409,21 @@ public class KCollider {
       }
 
       absolutePoints = new PVector[pts.length];
+      rotatedPoints = new PVector[pts.length];
+      points = new PVector[pts.length];
+      pointsAsPolar = new float[points.length][];
       for (int i = 0; i < pts.length; ++i) {
         absolutePoints[i] = new PVector(pts[i][0], pts[i][1]);
-      }
-      points = new PVector[absolutePoints.length];
-      for (int i = 0; i < absolutePoints.length; ++i) {
-        points[i] = new PVector(absolutePoints[i].x, absolutePoints[i].y);
+        rotatedPoints[i] = new PVector(pts[i][0], pts[i][1]);
+        points[i] = new PVector(pts[i][0], pts[i][1]);
+        pointsAsPolar[i] = new float[]{
+            absolutePoints[i].heading(),
+            absolutePoints[i].mag()
+        };
       }
 
-      absoluteBBox = KCollider.findBBox(this);
-      bbox = new BoundingRect(absoluteBBox);
+      rotatedBBox = KCollider.findBBox(this);
+      bbox = new BoundingRect(rotatedBBox);
     }
   }
   // a bounding rectangle, used to do polygon and circle collisions
@@ -424,7 +469,7 @@ public class KCollider {
     PVector minPoint = new PVector(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY);
     PVector maxPoint = new PVector(Float.NEGATIVE_INFINITY, Float.NEGATIVE_INFINITY);
 
-    for (PVector p : poly.absolutePoints) {
+    for (PVector p : poly.rotatedPoints) {
       if (p.x < minPoint.x) minPoint.x = p.x;
       else if (p.x > maxPoint.x) maxPoint.x = p.x;
 

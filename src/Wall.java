@@ -14,7 +14,7 @@ public class Wall extends KEntity {
     this.w = w;
     this.h = h;
     // initialize collider
-    collider = new KCollider.Hitbox(x, y, w, h);
+    colliders = new KCollider.Hitbox[]{new KCollider.Hitbox(x, y, w, h)};
   }
 
   /* renders the wall to the canvas */

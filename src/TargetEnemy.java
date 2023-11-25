@@ -10,7 +10,7 @@ public class TargetEnemy extends EnemySuper {
     super("target");
     position = new PVector(x, y);
     currentHealth = MAX_HEALTH;
-    collider = new KCollider.Hitbox(position, 30);
+    colliders = new KCollider.Hitbox[]{new KCollider.Hitbox(position, 30)};
   }
 
   /* draws the target to the canvas */

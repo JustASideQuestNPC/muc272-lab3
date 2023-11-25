@@ -12,6 +12,9 @@ public class Player extends KEntity {
   private static final float HIGH_SPEED_FRICTION_MULT = 2f; // increases friction when above the soft speed cap
   private static final float VELOCITY_SOFT_CAP_SQ = VELOCITY_SOFT_CAP * VELOCITY_SOFT_CAP; // used during updates
   private static final float VELOCITY_HARD_CAP_SQ = VELOCITY_HARD_CAP * VELOCITY_HARD_CAP;
+
+  public static final int MAX_HEALTH = 100;
+
   public static final int MAX_STAMINA = 1000;
   // whenever the player damages an enemy, they regain (damage * ON_HIT_STAMINA_REGEN_MULT) points of stamina
   public static final float ON_HIT_STAMINA_REGEN_MULT = 1;
@@ -29,19 +32,62 @@ public class Player extends KEntity {
   private boolean passiveStaminaRegenAllowed = true;
 
   /* ctor */
-  Player(PVector pos) {
+  Player(PVector position) {
     super("player"); // initialize tag list
-    position = pos.copy();
+    this.position = position.copy();
     velocity = new PVector(0, 0);
     // initialize collider
-    collider = new KCollider.Hitbox(pos.x, pos.y, 25);
+    colliders = new KCollider.Hitbox[]{
+        new KCollider.Hitbox(new float[][]{
+            {-18, -26},
+            {-18,  -5},
+            {-22,  29},
+            {-32,  29},
+            {-40,  17},
+            {-40, -12},
+            {-28, -26}
+        }, position),
+        new KCollider.Hitbox(new float[][]{
+            { 18, -26},
+            { 18,  -5},
+            { 22,  29},
+            { 32,  29},
+            { 40,  17},
+            { 40, -12},
+            { 28, -26}
+        }, position),
+        new KCollider.Hitbox(new float[][]{
+            {-18,  -4},
+            {-14,   1},
+            {-16,  19},
+            {-22,  29}
+        }, position),
+        new KCollider.Hitbox(new float[][]{
+            { 18,  -4},
+            { 14,   1},
+            { 16,  19},
+            { 22,  29}
+        }, position),
+        new KCollider.Hitbox(new float[][]{
+            {-10,   1},
+            { -4, -11},
+            {  4, -11},
+            { 10,   1}
+        }, position),
+        new KCollider.Hitbox(new float[][]{
+            {-16,  19},
+            {-14,   1},
+            { 14,   1},
+            { 16,  19}
+        }, position)
+    };
     // initialize sprite
     sprite = new KSprite("sprites/player-4x.png")
-        .setImageMode(3) // processing would prefer i use CENTER, but all the all-caps names are really just ints
-        .setPos(position)
+        .setDisplayAnchor(KSprite.DisplayAnchor.CENTER)
         .setAngle(aimDirection)
         .setAngleOffset(PI / 2)
         .setScale(0.5);
+    currentHealth = MAX_HEALTH;
   }
 
   /* overload that takes discrete x and y coordinates */
@@ -130,6 +176,7 @@ public class Player extends KEntity {
     weapon.doFireCheck();
 
     setColliderPos(position);
+    setColliderAngle(aimDirection + (float)(PI / 2));
 
     // do collision checks
     for (KEntity wall : engine.getTagged("wall")) {

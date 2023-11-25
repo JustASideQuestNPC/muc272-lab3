@@ -18,12 +18,13 @@ public class Bullet extends KEntity {
     this.velocity = velocity;
     this.impactDamage = impactDamage;
     this.shotByPlayer = shotByPlayer;
-    collider = new KCollider.Hitbox(position.copy(), new PVector(0, 0));
+    colliders = new KCollider.Hitbox[]{new KCollider.Hitbox(position.copy(), new PVector(0, 0))};
   }
 
   /* draws the bullet to the canvas */
   @Override
   public void render(PGraphics pg) {
+    super.render(pg);
     pg.noStroke();
     pg.fill(Colors.RED.getCode());
     pg.ellipse(position.x, position.y, 10, 10);
@@ -34,9 +35,9 @@ public class Bullet extends KEntity {
   public void update(float dt) {
     // update collider - bullets use a line instead of a point to prevent them from being on one side
     // of an enemy on one frame, and on the other side of them on the next
-    collider.start.set(position);
+    colliders[0].start.set(position);
     position.add(PVector.mult(velocity, dt));
-    collider.end.set(position);
+    colliders[0].end.set(position);
 
     // check for collisions with walls
     for (KEntity wall : engine.getTagged("wall")) {

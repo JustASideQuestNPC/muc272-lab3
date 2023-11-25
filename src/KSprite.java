@@ -6,8 +6,8 @@ import processing.core.PVector;
 public class KSprite {
   public static Main app;
   private final PImage image;
-  private int imageMode = 0; // Processing would prefer I use CORNER, but CORNER is actually just 0
-  private float x, y, width, height, angle, angleOffset;
+  private DisplayAnchor displayAnchor = DisplayAnchor.TOP_LEFT;
+  private float x, y, xOffset, yOffset, width, height, angle, angleOffset;
 
   /* ctor, takes the path to the image */
   KSprite(String imagePath) {
@@ -29,15 +29,48 @@ public class KSprite {
   public KSprite setSize(float width, float height) {
     this.width = width;
     this.height = height;
+    setDisplayAnchor(displayAnchor);
     return this;
   }
-  public KSprite setImageMode(int imageMode) throws IllegalArgumentException {
-    if (imageMode != 0 && imageMode != 3) {
-      throw new IllegalArgumentException(String.format("Invalid image mode (expected 0 (CORNER) or 3 (CENTER)," +
-                                                           "recieved %d)\nNote: image mode 1 (CORNERS) is not supported" +
-                                                           "for technical reasons", imageMode));
+  public KSprite setDisplayAnchor(DisplayAnchor displayAnchor) {
+    this.displayAnchor = displayAnchor;
+    switch (displayAnchor) {
+      case TOP:
+        xOffset = width / 2;
+        yOffset = 0;
+        break;
+      case BOTTOM:
+        xOffset = width / 2;
+        yOffset = height;
+        break;
+      case LEFT:
+        xOffset = 0;
+        yOffset = height / 2;
+        break;
+      case RIGHT:
+        xOffset = width;
+        yOffset = height / 2;
+        break;
+      case TOP_LEFT:
+        xOffset = 0;
+        yOffset = 0;
+        break;
+      case TOP_RIGHT:
+        xOffset = width;
+        yOffset = 0;
+        break;
+      case BOTTOM_LEFT:
+        xOffset = 0;
+        yOffset = height;
+        break;
+      case BOTTOM_RIGHT:
+        xOffset = width;
+        yOffset = height;
+        break;
+      case CENTER:
+        xOffset = width / 2;
+        yOffset = height / 2;
     }
-    this.imageMode = imageMode;
     return this;
   }
   public KSprite setAngle(float angle) {
@@ -56,7 +89,7 @@ public class KSprite {
   public KSprite setScale(float scale) {
     return setSize(image.width * scale, image.height * scale);
   }
-  // overload that takes a double to keep things clean
+  // overload that takes a double to keep code in other files clean
   public KSprite setScale(double scale) {
     return setScale((float)scale);
   }
@@ -64,12 +97,24 @@ public class KSprite {
   /* renders the sprite to the given canvas */
   public void render(PGraphics pg) {
     pg.pushStyle();
-    pg.imageMode(imageMode);
+    pg.imageMode(0);
     pg.pushMatrix();
     pg.translate(x, y);
     pg.rotate(angle + angleOffset);
-    pg.image(image, 0, 0, width, height);
+    pg.image(image, -xOffset, -yOffset, width, height);
     pg.popMatrix();
     pg.popStyle();
+  }
+
+  public enum DisplayAnchor {
+    TOP,
+    BOTTOM,
+    LEFT,
+    RIGHT,
+    TOP_LEFT,
+    TOP_RIGHT,
+    BOTTOM_LEFT,
+    BOTTOM_RIGHT,
+    CENTER
   }
 }

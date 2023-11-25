@@ -9,10 +9,16 @@ import java.util.Arrays;
 public abstract class KEntity {
   protected final ArrayList<String> tags; // tags, can be used for almost anything
   public KEngine engine; // the engine containing the entity
-  public KCollider.Hitbox collider; // included to prevent object slicing, does not need to be initialized
+  public EnemyManager enemyManager; // used if the entity is an enemy for keeping entity limits correct
+  public KCollider.Hitbox[] colliders; // included to prevent object slicing, does not need to be initialized
   public boolean markForDelete = false;
-  protected int currentHealth;
+  protected float currentHealth;
   protected KSprite sprite;
+
+  /* constants for debugging */
+  public static boolean SHOW_COLLIDERS = false;
+  private static final int COLLIDER_COLOR = 0xffff00ff;
+  private static final int COLLIDER_STROKE_WEIGHT = 2;
 
   /* default ctor, intializes tags to an empty array */
   KEntity() {
@@ -27,10 +33,13 @@ public abstract class KEntity {
   /* renders the entity to pg. by default it renders the sprite if it has been created, otherwise it does nothing */
   public void render(PGraphics pg) {
     if (sprite != null) sprite.render(pg);
+    if (SHOW_COLLIDERS && colliders != null) {
+      for (KCollider.Hitbox collider : colliders) collider.render(pg, COLLIDER_COLOR, COLLIDER_STROKE_WEIGHT);
+    }
   }
 
   /* updates the entity, is passed the time since the last update; does nothing by default. */
-  public void update(float deltaTime) {}
+  public void update(float dt) {}
 
   /* returns whether the entity has the specified tag */
   public final boolean hasTag(String tag) {
@@ -38,23 +47,50 @@ public abstract class KEntity {
   }
 
   public final boolean colliding(KEntity other, PVector transVec) {
-    return KCollider.colliding(this.collider, other.collider, transVec);
+    if (this.colliders != null && other.colliders != null) {
+      for (KCollider.Hitbox thisCollider : this.colliders) {
+        for (KCollider.Hitbox otherCollider : other.colliders) {
+          if (KCollider.colliding(thisCollider, otherCollider, transVec)) return true;
+        }
+      }
+    }
+    return false;
   }
   public final boolean colliding(KEntity other) {
-    return KCollider.colliding(this.collider, other.collider);
+    for (KCollider.Hitbox thisCollider : this.colliders) {
+      for (KCollider.Hitbox otherCollider : other.colliders) {
+        if (KCollider.colliding(thisCollider, otherCollider)) return true;
+      }
+    }
+    return false;
   }
 
   public final void setColliderPos(PVector pos) {
-    collider.setPos(pos);
+    if (this.colliders != null) {
+      for (KCollider.Hitbox collider : colliders) {
+        collider.setPos(pos);
+      }
+    }
   }
 
-  public final int getHealth() {
+  public final void setColliderAngle(float angle) {
+    if (this.colliders != null) {
+      for (KCollider.Hitbox collider : colliders) {
+        collider.setAngle(angle);
+      }
+    }
+  }
+
+  public final float getCurrentHealth() {
     return currentHealth;
   }
 
   /* deals damage to the entity */
-  public void damage(int dmg) {
+  public void damage(float dmg) {
     currentHealth -= dmg;
     if (currentHealth <= 0) markForDelete = true;
   }
+
+  /* runs once when the entity is deleted by the engine; does nothing by default */
+  public void runOnDeath() {}
 }

@@ -11,7 +11,7 @@ public class Main extends PApplet {
   public static final boolean SHOW_BACKGROUND_GRID = true;
 
   /* debug stuff */
-  public static final boolean VERBOSE = true;
+  public static boolean VERBOSE = false;
 
   /* engine/world constants */
   public static final int WORLD_WIDTH = 2000;
@@ -94,21 +94,23 @@ public class Main extends PApplet {
     engine.addEntity(new Wall(-BORDER_WALL_THICKNESS, 0, BORDER_WALL_THICKNESS, WORLD_HEIGHT));
     // right wall
     engine.addEntity(new Wall(WORLD_WIDTH, 0, BORDER_WALL_THICKNESS, WORLD_HEIGHT));
-    engine.addEntity(new ChaserEnemy(WORLD_WIDTH / 3f, WORLD_HEIGHT / 2f));
 
     // add player
     player = engine.addEntity(new Player(WORLD_WIDTH / 2f, WORLD_HEIGHT / 2f));
     engine.setCameraPos(player.position.x, player.position.y);
+
+    // add enemy manager
+    engine.addEntity(new EnemyManager());
+
     if (VERBOSE) System.out.println("done");
 
-    // setup weapons
+    // setup a few enums
     if (VERBOSE) {
-      System.out.print("doing final weapon setup...");
+      System.out.print("doing final enum setup...");
       System.out.flush();
     }
-    for (Weapon weapon : Weapon.values()) {
-      weapon.setEngine(engine);
-    }
+    Weapon.setEngine(engine);
+    EnemyManager.EnemyType.setEngine(engine);
     if (VERBOSE) System.out.println("done");
 
     // give the player a weapon
@@ -184,8 +186,20 @@ public class Main extends PApplet {
     KInput.releaseMouse(mouseButton);
   }
 
-  /* java boilerplate that runs settings() and setup(), then starts the draw() loop */
+  /* called by java when the code is run - processing does this automatically when it compiles a sketch */
   public static void main(String[] args) {
+    // parse command line args
+    for (String arg : args) {
+      switch (arg) {
+        case "-v", "--verbose":
+          VERBOSE = true;
+          break;
+        case "--showcolliders":
+          KEntity.SHOW_COLLIDERS = true;
+          break;
+      }
+    }
+
     PApplet.main("Main");
   }
 }

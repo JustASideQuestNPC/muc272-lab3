@@ -27,7 +27,7 @@ public enum Weapon {
   private final float spreadRange, halfSpreadRange;
   private final float recoilImpulse;
   private final int damagePerShot;
-  private KEngine engine;
+  private static KEngine engine;
   public Player player;
   private float fireTimer, burstTimer;
   private int shotsRemaining = 0;
@@ -112,8 +112,8 @@ public enum Weapon {
   }
 
   /* sets the engine reference, called once in setup */
-  public void setEngine(KEngine engine) {
-    this.engine = engine;
+  public static void setEngine(KEngine engine) {
+    Weapon.engine = engine;
   }
 
   /* determines what input mode is used */

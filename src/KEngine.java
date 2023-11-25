@@ -127,7 +127,10 @@ public final class KEngine {
       else if (dtMult != 0) ent.update(dt * dtMult);
     }
 
-    // remove deleted entities
+    // run death methods for deleted entities, then delete them
+    entities.forEach((ent) -> {
+      if (ent.markForDelete) ent.runOnDeath();
+    });
     entities.removeIf((ent) -> ent.markForDelete);
 
     if (cameraEnabled) updateCamera();

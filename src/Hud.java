@@ -14,10 +14,11 @@ public class Hud {
   private static PGraphics pg; // where to draw the hud to
   private static State state = State.NONE; // what hud to draw
 
-  // buttons...so many buttons
+  /* hashmaps to store hud elements */
   private static final HashMap<String, Button> buttons = new HashMap<>();
   private static final HashMap<State, String[]> buttonGroups = new HashMap<>();
   private static String[] activeButtons = new String[]{};
+  private static final HashMap<String, KSprite> sprites = new HashMap<>();
 
   /* font stuff */
   // font objects - having a font object for each text size is generally preferred over using textSize()
@@ -37,7 +38,7 @@ public class Hud {
     UAV_OSD_SANS_MONO_28 = app.createFont(UAV_OSD_SANS_MONO_PATH, 28);
     UAV_OSD_SANS_MONO_14 = app.createFont(UAV_OSD_SANS_MONO_PATH, 14);
 
-    // haha builder pattern go brrr
+    // buttons...so many buttons
     buttons.put("pause menu resume", new Button(pg)
         .setPos(width / 2 - 225, height / 2 - 100)
         .setSize(450, 60)
@@ -84,6 +85,20 @@ public class Hud {
         "pause menu exit to menu",
         "pause menu exit to desktop"
     });
+
+    // add sprites for hud elements
+    sprites.put("stamina bar icon",
+        new KSprite("sprites/stamina-icon-2x.png")
+            .setDisplayAnchor(KSprite.DisplayAnchor.BOTTOM_LEFT)
+            .setPos(10, height - 5)
+            .setScale(0.5)
+    );
+    sprites.put("hp bar icon",
+        new KSprite("sprites/hp-icon-2x.png")
+            .setDisplayAnchor(KSprite.DisplayAnchor.BOTTOM_LEFT)
+            .setPos(10, height - 60)
+            .setScale(0.41)
+    );
   }
 
   /* updates display state */
@@ -125,10 +140,11 @@ public class Hud {
     // render special stuff based on state
     if (state == State.GAMEPLAY) {
       // display player stamina
-      int staminaBarXPos = width / 2 - 200;
-      int staminaBarYPos = height * 4 / 5;
+      sprites.get("stamina bar icon").render(pg);
+      int staminaBarXPos = 60;
+      int staminaBarYPos = height - 40;
       int staminaBarWidth = 400;
-      int staminaBarHeight = 10;
+      int staminaBarHeight = 15;
 
       pg.noStroke();
       pg.fill(Colors.TRANS_MEDIUM_TEAL.getCode());
@@ -136,6 +152,20 @@ public class Hud {
       pg.fill(Colors.MEDIUM_TEAL.getCode());
       pg.rect(staminaBarXPos, staminaBarYPos, (int)((float)staminaBarWidth / Player.MAX_STAMINA *
           Main.player.getCurrentStamina() + 0.5), staminaBarHeight);
+
+      // display player hp
+      sprites.get("hp bar icon").render(pg);
+      int hpBarXPos = 60;
+      int hpBarYPos = height - 88;
+      int hpBarWidth = 200;
+      int hpBarHeight = 15;
+
+      pg.noStroke();
+      pg.fill(Colors.TRANS_RED.getCode());
+      pg.rect(hpBarXPos, hpBarYPos, hpBarWidth, hpBarHeight);
+      pg.fill(Colors.RED.getCode());
+      pg.rect(hpBarXPos, hpBarYPos, (int)((float)hpBarWidth / Player.MAX_HEALTH *
+          Main.player.getCurrentHealth() + 0.5), hpBarHeight);
     }
 
     // draw debug overlays (if enabled)
