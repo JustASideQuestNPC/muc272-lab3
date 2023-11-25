@@ -13,8 +13,10 @@ public class Player extends KEntity {
   private static final float VELOCITY_SOFT_CAP_SQ = VELOCITY_SOFT_CAP * VELOCITY_SOFT_CAP; // used during updates
   private static final float VELOCITY_HARD_CAP_SQ = VELOCITY_HARD_CAP * VELOCITY_HARD_CAP;
 
+  /* hp/damage vars */
   public static final int MAX_HEALTH = 100;
 
+  /* stamina vars */
   public static final int MAX_STAMINA = 1000;
   // whenever the player damages an enemy, they regain (damage * ON_HIT_STAMINA_REGEN_MULT) points of stamina
   public static final float ON_HIT_STAMINA_REGEN_MULT = 1;
@@ -24,7 +26,7 @@ public class Player extends KEntity {
   private static final float DASH_VELOCITY = 1500;
   private static final float DASH_DURATION = 0.05f; // dash duration in seconds
   public static final float SLOW_TIME_ABILITY_DT_MULT = 0.2f;
-  public PVector position, velocity, onscreenPos;
+  public PVector velocity, onscreenPos;
   public float aimDirection;
   private Weapon weapon;
   private float dashMovementTimer;
@@ -196,7 +198,7 @@ public class Player extends KEntity {
     engine.setCameraTarget(position);
   }
 
-  // runs anything (abilities, equipment, etc) that gets triggered when the player *deals* (not takes) damage
+  /* runs anything (abilities, equipment, etc) that gets triggered when the player *deals* (not takes) damage */
   public void doOnHitEffects(int dealtDamage) {
     // apply stamina regen bonus
     currentStamina = min(currentStamina + dealtDamage * ON_HIT_STAMINA_REGEN_MULT, MAX_STAMINA);

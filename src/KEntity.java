@@ -12,6 +12,7 @@ public abstract class KEntity {
   public EnemyManager enemyManager; // used if the entity is an enemy for keeping entity limits correct
   public KCollider.Hitbox[] colliders; // included to prevent object slicing, does not need to be initialized
   public boolean markForDelete = false;
+  public PVector position;
   protected float currentHealth;
   protected KSprite sprite;
 

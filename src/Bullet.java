@@ -3,7 +3,7 @@ import processing.core.PVector;
 
 /* bullet fired by player weapons */
 public class Bullet extends KEntity {
-  public PVector position, velocity;
+  public PVector velocity;
 
   // yes, i'm aware that i could name this "damage", but having a variable with the same name as a method is wrong on so
   // many levels. i have far too much dignity to stoop that low...unlike the processing devs.

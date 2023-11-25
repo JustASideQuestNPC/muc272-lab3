@@ -28,7 +28,7 @@ public class Main extends PApplet {
   public static Player player;
 
   public static boolean paused = false;
-  KEngine engine;
+  public static KEngine engine;
 
   /* anything run from outside the processing editor has to call size() in settings() because...reasons? */
   @Override
@@ -102,15 +102,6 @@ public class Main extends PApplet {
     // add enemy manager
     engine.addEntity(new EnemyManager());
 
-    if (VERBOSE) System.out.println("done");
-
-    // setup a few enums
-    if (VERBOSE) {
-      System.out.print("doing final enum setup...");
-      System.out.flush();
-    }
-    Weapon.setEngine(engine);
-    EnemyManager.EnemyType.setEngine(engine);
     if (VERBOSE) System.out.println("done");
 
     // give the player a weapon

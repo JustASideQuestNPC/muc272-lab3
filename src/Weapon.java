@@ -27,7 +27,6 @@ public enum Weapon {
   private final float spreadRange, halfSpreadRange;
   private final float recoilImpulse;
   private final int damagePerShot;
-  private static KEngine engine;
   public Player player;
   private float fireTimer, burstTimer;
   private int shotsRemaining = 0;
@@ -74,7 +73,7 @@ public enum Weapon {
         }
       }
       else {
-        fireTimer -= engine.deltaTime();
+        fireTimer -= Main.engine.deltaTime();
       }
     }
     else if (shotsPerBurst == 1) {
@@ -83,7 +82,7 @@ public enum Weapon {
         fireTimer = secondsPerRound;
       }
       else {
-        fireTimer -= engine.deltaTime();
+        fireTimer -= Main.engine.deltaTime();
       }
     }
     else {
@@ -92,7 +91,7 @@ public enum Weapon {
         shotsRemaining = shotsPerBurst;
       }
       else {
-        burstTimer -= engine.deltaTime();
+        burstTimer -= Main.engine.deltaTime();
       }
     }
   }
@@ -102,18 +101,13 @@ public enum Weapon {
     for (int i = 0; i < bulletsPerShot; ++i) {
       float fireAngle = player.aimDirection + (float)(random() * spreadRange) - halfSpreadRange;
       PVector velocity = PVector.mult(PVector.fromAngle(fireAngle), muzzleVelocity);
-      engine.addEntity(new Bullet(player.position, velocity, damagePerShot, true));
+      Main.engine.addEntity(new Bullet(player.position, velocity, damagePerShot, true));
       // if the weapon has recoil, apply it to the player
       if (recoilImpulse != 0) {
         PVector impulse = PVector.mult(PVector.fromAngle(fireAngle), -recoilImpulse);
         player.velocity.add(impulse);
       }
     }
-  }
-
-  /* sets the engine reference, called once in setup */
-  public static void setEngine(KEngine engine) {
-    Weapon.engine = engine;
   }
 
   /* determines what input mode is used */

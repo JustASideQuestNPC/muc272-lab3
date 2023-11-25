@@ -30,7 +30,6 @@ public class EnemyManager extends KEntity {
     private int numInWave; // how many of the enemy are left in the current wave
     private int numActive; // how many of the enemy are currently active in the engine
     private int maxActive; // how many of the enemy can be active in the engine at once
-    public static KEngine engine; // engine to spawn entities to
     private final int minSpawnX, minSpawnY, maxSpawnX, maxSpawnY; // used to prevent enemies from spawning inside walls
     private final Function<PVector, KEntity> enemyCtor; // the constructor for the enemy type
     private final float spawnInterval; // minimum time between entity spawns, in seconds
@@ -57,7 +56,7 @@ public class EnemyManager extends KEntity {
     private void spawnEnemy() {
       PVector spawnPos = new PVector();
       spawnPos.set(randInRange(minSpawnX, maxSpawnX), randInRange(minSpawnY, maxSpawnY));
-      engine.addEntity(enemyCtor.apply(spawnPos));
+      Main.engine.addEntity(enemyCtor.apply(spawnPos));
       ++numActive;
       --numInWave;
       spawnTimer = spawnInterval;
@@ -78,11 +77,6 @@ public class EnemyManager extends KEntity {
     // why did no one think that a "random in range" function was a good idea? if c++ has one then java has no excuse
     private int randInRange(int min, int max) {
       return (int)(random() * (max - min) + min);
-    }
-
-    // sets the engine to spawn enemies to, called once in setup
-    public static void setEngine(KEngine engine) {
-      EnemyType.engine = engine;
     }
   }
 }

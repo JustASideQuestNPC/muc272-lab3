@@ -1,5 +1,6 @@
 import processing.core.PFont;
 import processing.core.PGraphics;
+import processing.core.PVector;
 
 import java.util.HashMap;
 
@@ -7,7 +8,6 @@ import static processing.core.PConstants.*;
 
 /* displays and updates hud and ui */
 public class Hud {
-  public static boolean ENABLE_DEBUG_OVERLAY = true; // toggles all debug overlays, overrides specific toggles
   public static boolean SHOW_FRAMERATE = false;
   private static int width, height; // for conviencence to keep names cleaner
   private static Main app;
@@ -166,19 +166,36 @@ public class Hud {
       pg.fill(Colors.RED.getCode());
       pg.rect(hpBarXPos, hpBarYPos, (int)((float)hpBarWidth / Player.MAX_HEALTH *
           Main.player.getCurrentHealth() + 0.5), hpBarHeight);
+
+
+      // draw indicators pointing to certain enemies
+      int enemyIndicatorDistance = 100;
+      float enemyIndicatorSize = 50;
+      pg.pushMatrix();
+      pg.translate(Main.player.onscreenPos.x, Main.player.onscreenPos.y);
+      pg.noStroke();
+      pg.fill(Colors.TRANS_RED.getCode());
+
+      for (KEntity ent : Main.engine.getTagged("has hud direction indicator")) {
+        PVector dir = PVector.sub(ent.position, Main.player.position);
+        pg.pushMatrix();
+        pg.rotate(dir.heading() + PI / 2);
+        pg.triangle(0, -enemyIndicatorDistance - enemyIndicatorSize / 2,
+                    -enemyIndicatorSize / 2, -enemyIndicatorDistance,
+                    enemyIndicatorSize / 2, -enemyIndicatorDistance);
+        pg.popMatrix();
+      }
+      pg.popMatrix();
     }
 
-    // draw debug overlays (if enabled)
-    if (ENABLE_DEBUG_OVERLAY) {
-      if (SHOW_FRAMERATE) {
-        pg.noStroke();
-        pg.fill(0xa0000000);
-        pg.rect(0, 0, 95, 22);
-        pg.fill(0xff00ff00);
-        pg.textFont(UAV_OSD_SANS_MONO_14);
-        pg.textAlign(LEFT, TOP);
-        pg.text(String.format("%03d FPS", (int)app.frameRate), 4, 3);
-      }
+    if (SHOW_FRAMERATE) {
+      pg.noStroke();
+      pg.fill(0xa0000000);
+      pg.rect(0, 0, 95, 22);
+      pg.fill(0xff00ff00);
+      pg.textFont(UAV_OSD_SANS_MONO_14);
+      pg.textAlign(LEFT, TOP);
+      pg.text(String.format("%03d FPS", (int)app.frameRate), 4, 3);
     }
   }
 

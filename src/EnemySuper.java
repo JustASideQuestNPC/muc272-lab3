@@ -3,7 +3,6 @@ import processing.core.PVector;
 
 /* superclass that all enemies inherit from - currently kind of unnecessary but will become more useful later */
 public abstract class EnemySuper extends KEntity {
-  public PVector position;
   private final int HEALTHBAR_CURRENT_COLOR = Colors.RED.getCode();
   private final int HEALTHBAR_MAX_COLOR = Colors.DARK_RED.getCode();
 
@@ -11,6 +10,7 @@ public abstract class EnemySuper extends KEntity {
   EnemySuper(String... tags) {
     super(tags);
     this.tags.add("enemy");
+    this.tags.add("has hud direction indicator");
   }
 
   /* draws a healthbar above the enemy */
