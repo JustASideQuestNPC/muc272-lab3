@@ -1,6 +1,7 @@
 import processing.core.PApplet;
 
 import java.lang.ref.WeakReference;
+import java.util.Objects;
 
 public class Main extends PApplet {
   // nb: if something is a constant and should never be changed, it's convention to declare it as "static final" (unless
@@ -35,6 +36,7 @@ public class Main extends PApplet {
   // to have (it'll also prevent issues if something that deletes the enemy manager is added later)
   public static WeakReference<EnemyManager> enemyManager;
   public static boolean paused = false;
+  public static boolean playerDead = false;
   public static Engine engine;
   public static int currentWave = 0;
   public static GameState gameState = GameState.MAIN_MENU;
@@ -126,16 +128,24 @@ public class Main extends PApplet {
       // update entities if not paused
       if (!paused) engine.update();
       else engine.updateDeltaTime();
+
+      // check if the player is dead
+      if (playerDead) setState(GameState.GAME_OVER);
+
+      // check if the wave has been completed
+      if (enemyManager.get().waveFinished() && !paused) {
+        paused = true;
+        Hud.setState(GameState.WAVE_COMPLETE);
+      }
     }
 
     // render based on game state
-    switch (gameState) {
-      case GAMEPLAY:
-        background(GAMEPLAY_BACKGROUND_COLOR);
-        engine.render();
-        break;
-      case MAIN_MENU:
-        background(MENU_BACKGROUND_COLOR);
+    if (Objects.requireNonNull(gameState) == GameState.GAMEPLAY) {
+      background(GAMEPLAY_BACKGROUND_COLOR);
+      engine.render();
+    }
+    else {
+      background(MENU_BACKGROUND_COLOR);
     }
 
     // hud is always rendered regardless of state
@@ -164,13 +174,15 @@ public class Main extends PApplet {
       engine.addEntity(new Wall(WORLD_WIDTH, 0, BORDER_WALL_THICKNESS, WORLD_HEIGHT));
 
       // add player
+      playerDead = false;
       playerRef = new WeakReference<>(engine.addEntity(new Player(WORLD_WIDTH / 2f, WORLD_HEIGHT / 2f)));
       engine.setCameraPos(playerRef.get().position.x, playerRef.get().position.y);
 
       // give the player a weapon
       playerRef.get().equipWeapon(Weapon.DEVGUN);
 
-      // load the current wave
+      // return to and load the first wave
+      currentWave = 0;
       enemyManager.get().loadWave(currentWave);
     }
   }
@@ -225,6 +237,8 @@ public class Main extends PApplet {
   public enum GameState {
     GAMEPLAY,
     PAUSE_MENU,
-    MAIN_MENU
+    MAIN_MENU,
+    WAVE_COMPLETE,
+    GAME_OVER
   }
 }

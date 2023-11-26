@@ -212,6 +212,14 @@ public class Player extends GameEntity {
     weapon.player = new WeakReference<>(this);
   }
 
+  @Override
+  public void damage(float dmg) {
+    currentHealth -= dmg;
+    if (currentHealth <= 0) {
+      Main.playerDead = true;
+    }
+  }
+
   public float getCurrentStamina() {
     return currentStamina;
   }

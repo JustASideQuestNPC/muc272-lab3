@@ -2,7 +2,6 @@ import processing.core.PVector;
 import processing.data.JSONArray;
 import processing.data.JSONObject;
 
-import java.util.HashMap;
 import java.util.function.Function;
 
 import static java.lang.Math.random;
@@ -10,6 +9,7 @@ import static java.lang.Math.random;
 /* invisible entity that spawns enemies */
 public class EnemyManager extends GameEntity {
   private final JSONArray allWaveData; // json data for all waves
+  private boolean completed;
 
   EnemyManager(JSONArray allWaveData) {
     // "purge exempt" ensures the manager will be in the engine for all of runtime
@@ -42,8 +42,16 @@ public class EnemyManager extends GameEntity {
   }
 
   public void update(float dt) {
-    // do update checks for each enemy type
-    for (EnemyType enemyType : EnemyType.values()) enemyType.update(dt);
+    completed = true;
+    // do update checks for each enemy type, also check if the wave has been completed
+    for (EnemyType enemyType : EnemyType.values()) {
+      enemyType.update(dt);
+      if (!enemyType.completed) completed = false;
+    }
+  }
+
+  public boolean waveFinished() {
+    return completed;
   }
 
   /* I can't decide whether this is the most elegant piece of code I've ever written, or the most terrifying...probably
@@ -123,10 +131,6 @@ public class EnemyManager extends GameEntity {
 
     public String getName() {
       return name;
-    }
-
-    public boolean doneSpawning() {
-      return completed;
     }
 
     // why did no one think to add a "random in range" function? if c++ has one then java has no excuse
