@@ -1,7 +1,10 @@
 import processing.core.PApplet;
+import processing.data.JSONArray;
 
 import java.lang.ref.WeakReference;
+import java.util.List;
 import java.util.Objects;
+import java.util.Random;
 
 public class Main extends PApplet {
   // nb: if something is a constant and should never be changed, it's convention to declare it as "static final" (unless
@@ -17,9 +20,11 @@ public class Main extends PApplet {
   public static boolean VERBOSE = false;
 
   /* engine/world constants */
-  public static final int WORLD_WIDTH = 2000;
-  public static final int WORLD_HEIGHT = 2000;
+  private static final Random random = new Random();
+  public static final int WORLD_WIDTH = 2500;
+  public static final int WORLD_HEIGHT = 2500;
   public static final int BORDER_WALL_THICKNESS = 100;
+  public static final List<Weapon> allWeapons = List.of(Weapon.values());
 
   /* graphics constants */
   // colors are actually just normal ints, but Processing gives them their own datatype because very weird things
@@ -39,6 +44,7 @@ public class Main extends PApplet {
   public static boolean playerDead = false;
   public static Engine engine;
   public static int currentWave = 0;
+  public static int numWaves;
   public static GameState gameState = GameState.MAIN_MENU;
 
   /* anything run from outside the processing editor has to call size() in settings() because...reasons? */
@@ -91,7 +97,9 @@ public class Main extends PApplet {
     engine.setCameraTightness(0.1f);
 
     // add enemy manager - this will hang out for all of runtime and will never be deleted
-   enemyManager = new WeakReference<>(engine.addEntity(new EnemyManager(loadJSONArray("waves.json"))));
+    JSONArray waveJson = loadJSONArray("waves.json");
+    numWaves = waveJson.size();
+    enemyManager = new WeakReference<>(engine.addEntity(new EnemyManager(waveJson)));
     if (VERBOSE) System.out.println("done");
 
     if (VERBOSE) {
@@ -134,8 +142,15 @@ public class Main extends PApplet {
 
       // check if the wave has been completed
       if (enemyManager.get().waveFinished() && !paused) {
-        paused = true;
-        Hud.setState(GameState.WAVE_COMPLETE);
+        ++currentWave;
+        if (currentWave < numWaves) {
+          paused = true;
+          engine.removeTagged("bullet");
+          Hud.setState(GameState.WAVE_COMPLETE);
+        }
+        else {
+          setState(GameState.RUN_COMPLETE);
+        }
       }
     }
 
@@ -239,6 +254,21 @@ public class Main extends PApplet {
     PAUSE_MENU,
     MAIN_MENU,
     WAVE_COMPLETE,
+    RUN_COMPLETE,
     GAME_OVER
+  }
+
+  /* returns a random weapon that isn't the weapon equipped on the player */
+  public static Weapon randomWeapon() {
+    Weapon weapon;
+    do {
+      weapon = allWeapons.get(random.nextInt(allWeapons.size()));
+    } while (weapon == playerRef.get().getWeapon());
+    return weapon;
+  }
+
+  // why did no one think to add a "random in range" function? if c++ has one then java has no excuse
+  public static int randInt(int min, int max) {
+    return random.nextInt(max - min) + min;
   }
 }

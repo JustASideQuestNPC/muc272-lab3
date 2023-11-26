@@ -1,8 +1,14 @@
 [
   {
     "chaser": {
-      "total"     : 5,
+      "total"     : 3,
       "max active": 1
+    }
+  },
+  {
+    "chaser": {
+      "total"     : 7,
+      "max active": 2
     }
   }
 ]

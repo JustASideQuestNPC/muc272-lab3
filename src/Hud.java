@@ -4,6 +4,7 @@ import processing.core.PVector;
 
 import java.util.HashMap;
 
+import static java.lang.Math.round;
 import static processing.core.PConstants.*;
 
 /* displays and updates hud and ui */
@@ -12,7 +13,7 @@ public class Hud {
   private static Main app;
   private static PGraphics pg; // where to draw the hud to
   private static Main.GameState state;
-  private static final int CLICK_DELAY_FRAMES = 10;
+  private static final int CLICK_DELAY_FRAMES = 0;
   private static int clickDelayTimer = CLICK_DELAY_FRAMES;
 
   /* hashmaps to store hud elements */
@@ -21,11 +22,16 @@ public class Hud {
   private static String[] activeButtons = new String[]{};
   private static final HashMap<String, Sprite> sprites = new HashMap<>();
 
+  /* containers for end-of-wave upgrades */
+  private static final UpgradeHolder[] upgrades = new UpgradeHolder[3];
+
   /* font stuff */
   // font objects - having a font object for each text size is generally preferred over using textSize()
-  public static PFont UAV_OSD_SANS_MONO_64, UAV_OSD_SANS_MONO_48, UAV_OSD_SANS_MONO_28, UAV_OSD_SANS_MONO_20;
+  public static PFont UAV_OSD_SANS_MONO_64, UAV_OSD_SANS_MONO_48, UAV_OSD_SANS_MONO_28, UAV_OSD_SANS_MONO_20,
+      OLNEY_LIGHT_16;
   // file paths
   public static final String UAV_OSD_SANS_MONO_PATH = "fonts/UAV-OSD-Sans-Mono.ttf";
+  public static final String OLNEY_LIGHT_PATH = "fonts/olney_light.otf";
 
   /* sets up everything */
   public static void init(Main app) {
@@ -40,6 +46,7 @@ public class Hud {
     UAV_OSD_SANS_MONO_48 = app.createFont(UAV_OSD_SANS_MONO_PATH, 48);
     UAV_OSD_SANS_MONO_28 = app.createFont(UAV_OSD_SANS_MONO_PATH, 28);
     UAV_OSD_SANS_MONO_20 = app.createFont(UAV_OSD_SANS_MONO_PATH, 20);
+    OLNEY_LIGHT_16 = app.createFont(OLNEY_LIGHT_PATH, 16);
 
     // buttons...so many buttons
     buttons.put("pause menu resume", new Button(pg)
@@ -170,6 +177,27 @@ public class Hud {
         .setHoveredFillColor(Colors.BLACK)
         .setHoveredTextColor(Colors.WHITE));
 
+    buttons.put("wave complete item 0", new Button(pg)
+        .setPos(width / 2 - 250, height / 4 + 50)
+        .setSize(150, 150)
+        .setFillColor(Colors.WHITE)
+        .setStrokeColor(Colors.BLACK)
+        .setStrokeWeight(4));
+
+    buttons.put("wave complete item 1", new Button(pg)
+        .setPos(width / 2 - 75, height / 4 + 50)
+        .setSize(150, 150)
+        .setFillColor(Colors.WHITE)
+        .setStrokeColor(Colors.BLACK)
+        .setStrokeWeight(4));
+
+    buttons.put("wave complete item 2", new Button(pg)
+        .setPos(width / 2 + 100, height / 4 + 50)
+        .setSize(150, 150)
+        .setFillColor(Colors.WHITE)
+        .setStrokeColor(Colors.BLACK)
+        .setStrokeWeight(4));
+
     // create button groups
     buttonGroups.put(Main.GameState.PAUSE_MENU, new String[]{
         "pause menu resume",
@@ -182,8 +210,16 @@ public class Hud {
     });
     buttonGroups.put(Main.GameState.WAVE_COMPLETE, new String[]{
         "wave complete exit to menu",
-        "wave complete restart run"});
+        "wave complete restart run",
+        "wave complete item 0",
+        "wave complete item 1",
+        "wave complete item 2"});
     buttonGroups.put(Main.GameState.GAME_OVER, new String[]{
+        "game over restart run",
+        "game over exit to menu",
+        "game over exit to desktop"
+    });
+    buttonGroups.put(Main.GameState.RUN_COMPLETE, new String[]{
         "game over restart run",
         "game over exit to menu",
         "game over exit to desktop"
@@ -213,6 +249,13 @@ public class Hud {
     // un-hover all buttons
     for (Button b : buttons.values()) {
       b.setHovered(false);
+    }
+
+    // generate new items if a wave has been completed
+    if (state == Main.GameState.WAVE_COMPLETE) {
+      for (int i = 0; i < upgrades.length; ++i) {
+        upgrades[i] = new UpgradeHolder();
+      }
     }
   }
 
@@ -254,8 +297,22 @@ public class Hud {
           if (buttons.get("wave complete exit to menu").isPressed()) {
             app.setState(Main.GameState.MAIN_MENU);
           }
+          // check if an upgrade has been selected
+          for (int i = 0; i < upgrades.length; ++i) {
+            String buttonName = String.format("wave complete item %d", i);
+            UpgradeHolder upgrade = upgrades[i];
+            if (buttons.get(buttonName).isPressed()) {
+              if (upgrade.isWeapon) {
+                Main.playerRef.get().equipWeapon(upgrade.weapon);
+              }
+              // start the next wave and unpause
+              Main.enemyManager.get().loadWave(Main.currentWave);
+              Main.paused = false;
+              setState(Main.GameState.GAMEPLAY);
+            }
+          }
           break;
-        case GAME_OVER:
+        case GAME_OVER, RUN_COMPLETE:
           if (buttons.get("game over restart run").isPressed()) {
             app.setState(Main.GameState.GAMEPLAY);
           }
@@ -287,9 +344,19 @@ public class Hud {
         int staminaBarHeight = 15;
 
         pg.noStroke();
-        pg.fill(Colors.TRANS_MEDIUM_TEAL.getCode());
+        if (Main.playerRef.get().isStaminaPenaltyActive()) {
+          pg.fill(Colors.TRANS_DARK_RED.getCode());
+        }
+        else {
+          pg.fill(Colors.TRANS_MEDIUM_TEAL.getCode());
+        }
         pg.rect(staminaBarXPos, staminaBarYPos, staminaBarWidth, staminaBarHeight);
-        pg.fill(Colors.MEDIUM_TEAL.getCode());
+        if (Main.playerRef.get().isStaminaPenaltyActive()) {
+          pg.fill(Colors.DARK_RED.getCode());
+        }
+        else {
+          pg.fill(Colors.MEDIUM_TEAL.getCode());
+        }
         pg.rect(staminaBarXPos, staminaBarYPos, (int)((float)staminaBarWidth / Player.MAX_STAMINA *
             Main.playerRef.get().getCurrentStamina() + 0.5), staminaBarHeight);
 
@@ -348,7 +415,27 @@ public class Hud {
         pg.textAlign(CENTER, CENTER);
         pg.noStroke();
         pg.fill(Colors.BLACK.getCode());
-        pg.text("WAVE COMPLETE", width / 2f, height / 5f);
+        pg.text("WAVE COMPLETE", width / 2f, height / 6f - 10);
+        pg.textFont(UAV_OSD_SANS_MONO_28);
+        pg.text("Choose an item to go the next wave", width / 2f, height / 4f);
+        // draw tooltips for each item
+        for (int i = 0; i < upgrades.length; ++i) {
+          String buttonName = String.format("wave complete item %d", i);
+          if (buttons.get(buttonName).isHovered()) {
+            pg.fill(Colors.WHITE.getCode());
+            pg.stroke(Colors.BLACK.getCode());
+            pg.strokeWeight(4);
+            pg.rect(Input.mousePos.x, Input.mousePos.y, 300, upgrades[i].tooltipHeight);
+            pg.noStroke();
+            pg.fill(Colors.BLACK.getCode());
+            pg.textAlign(LEFT, TOP);
+            pg.textFont(UAV_OSD_SANS_MONO_28);
+            pg.text(upgrades[i].name, Input.mousePos.x + 10, Input.mousePos.y + 10);
+            pg.fill(Colors.DARK_TEAL.getCode());
+            pg.textFont(OLNEY_LIGHT_16);
+            pg.text(upgrades[i].description, Input.mousePos.x + 10, Input.mousePos.y + 50, 280, 1000);
+          }
+        }
         break;
       case GAME_OVER:
         pg.textFont(UAV_OSD_SANS_MONO_64);
@@ -356,6 +443,68 @@ public class Hud {
         pg.noStroke();
         pg.fill(Colors.BLACK.getCode());
         pg.text("YOU ARE DEAD", width / 2f, height / 5f);
+        break;
+      case RUN_COMPLETE:
+        pg.textFont(UAV_OSD_SANS_MONO_64);
+        pg.textAlign(CENTER, CENTER);
+        pg.noStroke();
+        pg.fill(Colors.BLACK.getCode());
+        pg.text("RUN COMPLETE", width / 2f, height / 6f - 10);
+        pg.textFont(UAV_OSD_SANS_MONO_28);
+        pg.text("You win!", width / 2f, height / 4f);
     }
+  }
+
+  /* used for randomizing upgrades at the end of each wave */
+  private static class UpgradeHolder {
+    public boolean isWeapon;
+    public Weapon weapon;
+    public String name, description;
+    public int tooltipHeight;
+
+    UpgradeHolder() {
+      // generate a random weapon or upgrade (once upgrades have actually been added)
+      isWeapon = true;
+      weapon = Main.randomWeapon();
+      name = weapon.getName();
+      description = weapon.getDescription();
+      tooltipHeight = Hud.textHeight(description, OLNEY_LIGHT_16, 280) + 50;
+    }
+  }
+
+  /* IT SHOULD NOT BE THIS HARD TO FIND OUT HOW TALL A BOX NEEDS TO BE. */
+  public static int textHeight(String str, PFont font, int specificWidth) {
+    pg.pushStyle();
+    pg.textFont(font); // I definitely shouldn't need to load a font to find out how tall a box needs to be
+    float leading = pg.textLeading;
+    // split by new lines first
+    String[] paragraphs = str.split("\n");
+    int numberEmptyLines = 0;
+    int numTextLines = 0;
+    for (String paragraph : paragraphs) {
+      // skip empty lines
+      if (paragraph.isEmpty()) {
+        ++numberEmptyLines;
+      }
+      else {
+        ++numTextLines;
+        // word wrap
+        String[] wordsArray = paragraph.split(" ");
+        StringBuilder tempString = new StringBuilder();
+        for (String s : wordsArray) {
+          if (pg.textWidth(tempString + s) < specificWidth) {
+            tempString.append(s).append(" ");
+          }
+          else {
+            tempString = new StringBuilder(s + " ");
+            numTextLines++;
+          }
+        }
+      }
+    }
+    pg.popStyle();
+
+    float totalLines = numTextLines + numberEmptyLines;
+    return round(totalLines * leading);
   }
 }

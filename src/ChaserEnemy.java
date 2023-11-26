@@ -36,13 +36,21 @@ public class ChaserEnemy extends EnemySuper {
         .setAngle(angle)
         .setAngleOffset(PI / 2)
         .setScale(0.5);
+
+    // orient to point directly at the player
+    targetAngle = (float)(atan2(Main.playerRef.get().position.y - position.y,
+                          Main.playerRef.get().position.x - position.x));
+    angle = (targetAngle % TWO_PI + TWO_PI) % TWO_PI;
+    setColliderAngle((float)(angle + PI / 2));
+    sprite.setAngle(angle);
   }
 
   /* updates everything */
   @Override
   public void update(float dt) {
     // find the angle to the playerRef.get() and add half a rotation so the enemy rotates toward the playerRef.get()
-    targetAngle = (float)(atan2(Main.playerRef.get().position.y - position.y, Main.playerRef.get().position.x - position.x) + PI);
+    targetAngle = (float)(atan2(Main.playerRef.get().position.y - position.y,
+                                Main.playerRef.get().position.x - position.x) + PI);
 
     // clamp our angle and the target angle to within a single rotation to prevent spinning infinitely - two mod
     // operations are required here to make sure the angles are always positive

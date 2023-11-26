@@ -2,6 +2,7 @@ import processing.core.PVector;
 import processing.data.JSONArray;
 import processing.data.JSONObject;
 
+import java.util.List;
 import java.util.function.Function;
 
 import static java.lang.Math.random;
@@ -10,6 +11,9 @@ import static java.lang.Math.random;
 public class EnemyManager extends GameEntity {
   private final JSONArray allWaveData; // json data for all waves
   private boolean completed;
+
+  // cache a list of all enemy types to prevent copying this on every frame
+  private static final List<EnemyType> enemyTypes = List.of(EnemyType.values());
 
   EnemyManager(JSONArray allWaveData) {
     // "purge exempt" ensures the manager will be in the engine for all of runtime
@@ -28,7 +32,7 @@ public class EnemyManager extends GameEntity {
       throw new IllegalArgumentException(String.format("Wave %d does not exist!", waveNum));
     }
     JSONObject waveData = allWaveData.getJSONObject(waveNum);
-    for (EnemyType enemyType : EnemyType.values()) {
+    for (EnemyType enemyType : enemyTypes) {
       if (waveData.hasKey(enemyType.getName())) {
         JSONObject enemyData = waveData.getJSONObject(enemyType.getName());
         enemyType.setNumInWave(enemyData.getInt("total"));
@@ -60,7 +64,7 @@ public class EnemyManager extends GameEntity {
     CHASER(
         "chaser",
         ChaserEnemy::new,
-        50,
+        100,
         0.5f,
         400,
         10000
@@ -107,7 +111,7 @@ public class EnemyManager extends GameEntity {
       // do-while loops are the same as while loops, but they check the condition after running, which means they're
       // guaranteed to run the code inside them at least once
       do {
-        spawnPos.set(randInRange(minSpawnX, maxSpawnX), randInRange(minSpawnY, maxSpawnY));
+        spawnPos.set(Main.randInt(minSpawnX, maxSpawnX), Main.randInt(minSpawnY, maxSpawnY));
         playerDist.set(PVector.sub(spawnPos, Main.playerRef.get().position));
       } while (playerDist.magSq() < minPlayerDistanceSq || playerDist.magSq() > maxPlayerDistanceSq);
 
@@ -131,11 +135,6 @@ public class EnemyManager extends GameEntity {
 
     public String getName() {
       return name;
-    }
-
-    // why did no one think to add a "random in range" function? if c++ has one then java has no excuse
-    private int randInRange(int min, int max) {
-      return (int)(random() * (max - min) + min);
     }
   }
 }

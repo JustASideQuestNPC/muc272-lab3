@@ -3,8 +3,7 @@ import processing.core.PVector;
 import java.lang.ref.WeakReference;
 import java.util.function.Supplier;
 
-import static java.lang.Math.random;
-import static java.lang.Math.toRadians;
+import static java.lang.Math.*;
 
 /* all player weapons - i'll give java the win here, its enums are way cooler than c++ enums */
 public enum Weapon {
@@ -17,7 +16,36 @@ public enum Weapon {
     1,
     1,
     0,
-    25
+    25,
+    "devgun",
+    "are you sure you should be reading this?"
+  ),
+  PISTOL(
+    FireMode.SEMI,
+    450,
+    0,
+    1800,
+    8,
+    1,
+    1,
+    0,
+    50,
+    "Pistol",
+    "A basic handgun. High damage and accuracy with a middling rate of fire."
+  ),
+
+  AKM(
+    FireMode.AUTO,
+    600,
+    0,
+    1200,
+    15,
+    1,
+    1,
+    0,
+    25,
+    "AKM",
+    "Every insurgent's favorite tool."
   );
 
   private final FireMode fireMode;
@@ -33,11 +61,12 @@ public enum Weapon {
   private int shotsRemaining = 0;
   private boolean firing = false;
   private final Supplier<Boolean> inputChecker; // completely unnecessary functional interface
-
+  private final String name, description;
 
   /* ctor */
   Weapon(FireMode fireMode, int roundsPerMinute, int burstsPerMinute, int muzzleVelocity, int spreadAngle,
-         int bulletsPerShot, int shotsPerBurst, int recoilImpulse, int damagePerShot) {
+         int bulletsPerShot, int shotsPerBurst, int recoilImpulse, int damagePerShot, String name,
+         String description) {
     this.fireMode = fireMode;
     secondsPerRound = 1 / (roundsPerMinute / 60f);
     secondsPerBurst = 1 / (burstsPerMinute / 60f);
@@ -49,6 +78,10 @@ public enum Weapon {
     this.shotsPerBurst = shotsPerBurst;
     this.recoilImpulse = recoilImpulse;
     this.damagePerShot = damagePerShot;
+    this.name = name;
+    int accuracyPercentage = (int)(((float)(90 - spreadAngle) / 90) * 100);
+    this.description = String.format("%s\nDamage: %d\nAccuracy: %d%%\nRate of Fire: %d RPM",
+                                     description, damagePerShot, accuracyPercentage, roundsPerMinute);
 
     // set input checker based on firemode
     if (this.fireMode == FireMode.AUTO) {
@@ -112,9 +145,15 @@ public enum Weapon {
   }
 
   /* determines what input mode is used */
-  @SuppressWarnings("unused")
   public enum FireMode {
     SEMI,
     AUTO,
+  }
+  public String getName() {
+    return name;
+  }
+
+  public String getDescription() {
+    return description;
   }
 }

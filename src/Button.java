@@ -2,6 +2,8 @@ import processing.core.PFont;
 import processing.core.PGraphics;
 import processing.core.PVector;
 
+import java.util.Objects;
+
 import static processing.core.PGraphics.*;
 
 /* an interactable button for use with the hud */
@@ -151,20 +153,22 @@ public class Button {
       }
     }
     pg.rect(x, y, width, height);
-    pg.textAlign(textAlignX, textAlignY);
-    pg.noStroke();
-    if (pressed) pg.fill(pressedTextColor);
-    else if (hovered) pg.fill(hoveredTextColor);
-    else pg.fill(textColor);
-    pg.textFont(font);
-    pg.text(text, x + textX, y + textY);
+    if (!Objects.equals(text, "") && font != null) {
+      pg.textAlign(textAlignX, textAlignY);
+      pg.noStroke();
+      if (pressed) pg.fill(pressedTextColor);
+      else if (hovered) pg.fill(hoveredTextColor);
+      else pg.fill(textColor);
+      pg.textFont(font);
+      pg.text(text, x + textX, y + textY);
+    }
   }
 
   /* updates the button */
   public void update() {
     PVector mpos = Input.mousePos;
     hovered = mpos.x >= x && mpos.x <= x + width && mpos.y >= y && mpos.y <= y + height;
-    pressed = Input.getKeyState(Key.LEFT_MOUSE) && hovered;
+    pressed = Input.isActive("fire semi") && hovered;
   }
 
   public boolean isHovered() {

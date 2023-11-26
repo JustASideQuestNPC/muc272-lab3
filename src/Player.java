@@ -20,9 +20,11 @@ public class Player extends GameEntity {
 
   /* stamina vars */
   public static final int MAX_STAMINA = 1000;
+  // after stamina is fully drained, the player can't use abilities until they regain at least this much stamina
+  public static final int STAMINA_FULL_DRAIN_PENALTY = 300;
   // whenever the player damages an enemy, they regain (damage * ON_HIT_STAMINA_REGEN_MULT) points of stamina
-  public static final float ON_HIT_STAMINA_REGEN_MULT = 1;
-  public static final int PASSIVE_STAMINA_REGEN = 50; // points/second
+  public static final float ON_HIT_STAMINA_REGEN_MULT = 0;
+  public static final int PASSIVE_STAMINA_REGEN = 150; // points/second
   public static final int DASH_STAMINA_COST = 300;
   public static final int SLOW_TIME_STAMINA_COST = 500; // points/second
   private static final float DASH_VELOCITY = 1500;
@@ -34,6 +36,7 @@ public class Player extends GameEntity {
   private float dashMovementTimer;
   private float currentStamina = MAX_STAMINA;
   private boolean passiveStaminaRegenAllowed = true;
+  private boolean staminaPenaltyActive = false;
 
   /* ctor */
   Player(PVector position) {
@@ -115,7 +118,7 @@ public class Player extends GameEntity {
       if (Input.isActive("move right")) ++moveInput.x;
 
       // check for a dash input if the player has enough stamina
-      if (currentStamina >= DASH_STAMINA_COST) {
+      if (currentStamina >= DASH_STAMINA_COST && !staminaPenaltyActive) {
         // start a dash if the dash key and at least one movement key is pressed
         if (Input.isActive("dash") && moveInput.magSq() != 0) {
           dashMovementTimer = DASH_DURATION;
@@ -149,7 +152,7 @@ public class Player extends GameEntity {
     }
 
     passiveStaminaRegenAllowed = true;
-    if (Input.isActive("slow time") && currentStamina > 0) {
+    if (Input.isActive("slow time") && currentStamina > 0 && !staminaPenaltyActive) {
       engine.setDtMult(SLOW_TIME_ABILITY_DT_MULT);
       currentStamina -= SLOW_TIME_STAMINA_COST * dt;
       passiveStaminaRegenAllowed = false;
@@ -157,6 +160,10 @@ public class Player extends GameEntity {
     else {
       engine.setDtMult(1);
     }
+
+    // check for stamina penalty
+    if (currentStamina <= 0) staminaPenaltyActive = true;
+    else if (currentStamina >= STAMINA_FULL_DRAIN_PENALTY) staminaPenaltyActive = false;
 
     // apply passive stamina regen
     if (passiveStaminaRegenAllowed && currentStamina < MAX_STAMINA) {
@@ -222,5 +229,13 @@ public class Player extends GameEntity {
 
   public float getCurrentStamina() {
     return currentStamina;
+  }
+
+  public boolean isStaminaPenaltyActive() {
+    return staminaPenaltyActive;
+  }
+
+  public Weapon getWeapon() {
+    return weapon;
   }
 }

@@ -197,4 +197,9 @@ public final class Engine {
   public void purge() {
     purge(false);
   }
+
+  /* removes entities with the tag from the list */
+  public void removeTagged(String tag) {
+    entities.removeIf((ent) -> ent.hasTag(tag));
+  }
 }
