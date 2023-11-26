@@ -1,7 +1,7 @@
 import processing.core.PGraphics;
 import processing.core.PVector;
 
-/* bullet fired by player weapons */
+/* bullet fired by playerRef.get() weapons */
 public class Bullet extends GameEntity {
   public PVector velocity;
 
@@ -52,15 +52,15 @@ public class Bullet extends GameEntity {
       for (GameEntity enemy : engine.getTagged("enemy")) {
         if (colliding(enemy)) {
           enemy.damage(impactDamage);
-          Main.player.doOnHitEffects(impactDamage);
+          Main.playerRef.get().doOnHitEffects(impactDamage);
           markForDelete = true;
           return;
         }
       }
     }
     else {
-      if (colliding(Main.player)) {
-        Main.player.damage(impactDamage);
+      if (colliding(Main.playerRef.get())) {
+        Main.playerRef.get().damage(impactDamage);
         markForDelete = true;
       }
     }

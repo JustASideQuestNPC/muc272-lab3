@@ -1,5 +1,6 @@
 import processing.core.PVector;
 
+import java.lang.ref.WeakReference;
 import java.util.function.Supplier;
 
 import static java.lang.Math.random;
@@ -27,7 +28,7 @@ public enum Weapon {
   private final float spreadRange, halfSpreadRange;
   private final float recoilImpulse;
   private final int damagePerShot;
-  public Player player;
+  public WeakReference<Player> player;
   private float fireTimer, burstTimer;
   private int shotsRemaining = 0;
   private boolean firing = false;
@@ -99,13 +100,13 @@ public enum Weapon {
   /* fires bullets */
   private void fireShot() {
     for (int i = 0; i < bulletsPerShot; ++i) {
-      float fireAngle = player.aimDirection + (float)(random() * spreadRange) - halfSpreadRange;
+      float fireAngle = player.get().aimDirection + (float)(random() * spreadRange) - halfSpreadRange;
       PVector velocity = PVector.mult(PVector.fromAngle(fireAngle), muzzleVelocity);
-      Main.engine.addEntity(new Bullet(player.position, velocity, damagePerShot, true));
+      Main.engine.addEntity(new Bullet(player.get().position, velocity, damagePerShot, true));
       // if the weapon has recoil, apply it to the player
       if (recoilImpulse != 0) {
         PVector impulse = PVector.mult(PVector.fromAngle(fireAngle), -recoilImpulse);
-        player.velocity.add(impulse);
+        player.get().velocity.add(impulse);
       }
     }
   }

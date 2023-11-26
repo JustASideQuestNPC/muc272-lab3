@@ -2,14 +2,14 @@ import processing.core.PVector;
 
 import static java.lang.Math.*;
 
-/* a simple enemy that chases the player */
+/* a simple enemy that chases the playerRef.get() */
 public class ChaserEnemy extends EnemySuper {
   // 2 * pi is used a lot, so we cache it here to avoid some unnecessary multiplication operations and get a
   // worthlessly small performance boost
   private static final float TWO_PI = (float)(2 * PI);
   private static final float TURN_SPEED = (float)(PI * 3 / 2); // radians per second
   private static final float MOVE_SPEED = 600;  // pixels per second
-  private static final float DAMAGE_TO_PLAYER = 30; // dealt when the enemy hits the player
+  private static final float DAMAGE_TO_PLAYER = 30; // dealt when the enemy hits the playerRef.get()
   private static final int MAX_HEALTH = 20;
   private float angle, targetAngle;
 
@@ -41,15 +41,15 @@ public class ChaserEnemy extends EnemySuper {
   /* updates everything */
   @Override
   public void update(float dt) {
-    // find the angle to the player and add half a rotation so the enemy rotates toward the player
-    targetAngle = (float)(atan2(Main.player.position.y - position.y, Main.player.position.x - position.x) + PI);
+    // find the angle to the playerRef.get() and add half a rotation so the enemy rotates toward the playerRef.get()
+    targetAngle = (float)(atan2(Main.playerRef.get().position.y - position.y, Main.playerRef.get().position.x - position.x) + PI);
 
     // clamp our angle and the target angle to within a single rotation to prevent spinning infinitely - two mod
     // operations are required here to make sure the angles are always positive
     angle = (angle % TWO_PI + TWO_PI) % TWO_PI;
     targetAngle = (targetAngle % TWO_PI + TWO_PI) % TWO_PI;
 
-    // rotate toward the player if we aren't already aiming at them
+    // rotate toward the playerRef.get() if we aren't already aiming at them
     if (angle != targetAngle) {
       // store which side of the target angle we're on to prevent an overshoot later
       boolean lessThanTargetAngle = (angle < targetAngle);
@@ -84,9 +84,9 @@ public class ChaserEnemy extends EnemySuper {
       }
     }
 
-    // check for collisions with the player
-    if (colliding(Main.player)) {
-      Main.player.damage(DAMAGE_TO_PLAYER);
+    // check for collisions with the playerRef.get()
+    if (colliding(Main.playerRef.get())) {
+      Main.playerRef.get().damage(DAMAGE_TO_PLAYER);
       markForDelete = true;
       return;
     }

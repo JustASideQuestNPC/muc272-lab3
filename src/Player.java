@@ -1,5 +1,7 @@
 import processing.core.PVector;
 
+import java.lang.ref.WeakReference;
+
 import static java.lang.Math.*;
 
 /* the player, obviously */
@@ -207,7 +209,7 @@ public class Player extends GameEntity {
   /* equips a new weapon */
   public void equipWeapon(Weapon weapon) {
     this.weapon = weapon;
-    weapon.player = this;
+    weapon.player = new WeakReference<>(this);
   }
 
   public float getCurrentStamina() {

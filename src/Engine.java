@@ -192,7 +192,7 @@ public final class Engine {
   /* removes all entities from the entity list. if force is false, entities with the "purge exempt" tag are ignored. */
   public void purge(boolean force) {
     if (force) entities.clear();
-    else entities.removeIf((ent) -> ent.hasTag("purge exempt"));
+    else entities.removeIf((ent) -> !ent.hasTag("purge exempt"));
   }
   public void purge() {
     purge(false);

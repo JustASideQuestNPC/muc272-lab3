@@ -189,7 +189,7 @@ public class Hud {
     // render special stuff based on state
     switch(state) {
       case Main.GameState.GAMEPLAY:
-        // display player stamina
+        // display playerRef.get() stamina
         sprites.get("stamina bar icon").render(pg);
         int staminaBarXPos = 60;
         int staminaBarYPos = height - 40;
@@ -201,9 +201,9 @@ public class Hud {
         pg.rect(staminaBarXPos, staminaBarYPos, staminaBarWidth, staminaBarHeight);
         pg.fill(Colors.MEDIUM_TEAL.getCode());
         pg.rect(staminaBarXPos, staminaBarYPos, (int)((float)staminaBarWidth / Player.MAX_STAMINA *
-            Main.player.getCurrentStamina() + 0.5), staminaBarHeight);
+            Main.playerRef.get().getCurrentStamina() + 0.5), staminaBarHeight);
 
-        // display player hp
+        // display playerRef.get() hp
         sprites.get("hp bar icon").render(pg);
         int hpBarXPos = 60;
         int hpBarYPos = height - 88;
@@ -215,20 +215,20 @@ public class Hud {
         pg.rect(hpBarXPos, hpBarYPos, hpBarWidth, hpBarHeight);
         pg.fill(Colors.RED.getCode());
         pg.rect(hpBarXPos, hpBarYPos, (int)((float)hpBarWidth / Player.MAX_HEALTH *
-            Main.player.getCurrentHealth() + 0.5), hpBarHeight);
+            Main.playerRef.get().getCurrentHealth() + 0.5), hpBarHeight);
 
 
         // draw indicators pointing to certain enemies
         int enemyIndicatorDistance = 100;
         float enemyIndicatorSize = 50;
         pg.pushMatrix();
-        pg.translate(Main.player.onscreenPos.x, Main.player.onscreenPos.y);
+        pg.translate(Main.playerRef.get().onscreenPos.x, Main.playerRef.get().onscreenPos.y);
         pg.noStroke();
         pg.fill(Colors.TRANS_RED.getCode());
 
         for (GameEntity ent : Main.engine.getTagged("has hud direction indicator")) {
           if (!ent.isOnscreen()) {
-            PVector dir = PVector.sub(ent.position, Main.player.position);
+            PVector dir = PVector.sub(ent.position, Main.playerRef.get().position);
             pg.pushMatrix();
             pg.rotate(dir.heading() + PI / 2);
             pg.triangle(0, -enemyIndicatorDistance - enemyIndicatorSize / 2,

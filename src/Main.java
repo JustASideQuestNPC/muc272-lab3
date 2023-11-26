@@ -1,5 +1,7 @@
 import processing.core.PApplet;
 
+import java.lang.ref.WeakReference;
+
 public class Main extends PApplet {
   // nb: if something is a constant and should never be changed, it's convention to declare it as "static final" (unless
   // it can't be static, in which case just make it final) and format its name in SCREAMING_SNAKE_CASE
@@ -19,16 +21,22 @@ public class Main extends PApplet {
   public static final int BORDER_WALL_THICKNESS = 100;
 
   /* graphics constants */
-  // colors are actually just normal ints, but Processing gives them their own datatype because very weird things happen
-  // if you try to use them like ints
+  // colors are actually just normal ints, but Processing gives them their own datatype because very weird things
+  // happen if you try to use them like ints
   public static final int GAMEPLAY_BACKGROUND_COLOR = Colors.BLACK.getCode();
   public static final int BACKGROUND_GRID_COLOR_1 = Colors.WHITE.getCode();
   public static final int BACKGROUND_GRID_COLOR_2 = Colors.LIGHTER_TEAL.getCode();
   public static final int BACKGROUND_GRID_SIZE = 250;
   public static final int MENU_BACKGROUND_COLOR = Colors.WHITE.getCode();
-  public static Player player;
+  // WeakReferences reference an object while still allowing it to be destroyed - if we just referenced the player
+  // directly, the engine wouldn't be able to remove it until any references to it were set to null
+  public static WeakReference<Player> playerRef;
+  // the enemy manager technically doesn't need a weak reference since it'll never be deleted, but it's a good habit
+  // to have (it'll also prevent issues if something that deletes the enemy manager is added later)
+  public static WeakReference<EnemyManager> enemyManager;
   public static boolean paused = false;
   public static Engine engine;
+  public static int currentWave = 0;
   public static GameState gameState = GameState.MAIN_MENU;
 
   /* anything run from outside the processing editor has to call size() in settings() because...reasons? */
@@ -81,7 +89,7 @@ public class Main extends PApplet {
     engine.setCameraTightness(0.1f);
 
     // add enemy manager - this will hang out for all of runtime and will never be deleted
-    engine.addEntity(new EnemyManager());
+   enemyManager = new WeakReference<>(engine.addEntity(new EnemyManager(loadJSONArray("waves.json"))));
     if (VERBOSE) System.out.println("done");
 
     if (VERBOSE) {
@@ -142,7 +150,6 @@ public class Main extends PApplet {
 
     if (gameState == GameState.GAMEPLAY) {
       engine.purge(); // clear out any old entities
-      player = null; // delete the player from the engine so it doesn't end up still hanging out in the engine
 
       // add world border
       // top wall
@@ -157,11 +164,14 @@ public class Main extends PApplet {
       engine.addEntity(new Wall(WORLD_WIDTH, 0, BORDER_WALL_THICKNESS, WORLD_HEIGHT));
 
       // add player
-      player = engine.addEntity(new Player(WORLD_WIDTH / 2f, WORLD_HEIGHT / 2f));
-      engine.setCameraPos(player.position.x, player.position.y);
+      playerRef = new WeakReference<>(engine.addEntity(new Player(WORLD_WIDTH / 2f, WORLD_HEIGHT / 2f)));
+      engine.setCameraPos(playerRef.get().position.x, playerRef.get().position.y);
 
       // give the player a weapon
-      player.equipWeapon(Weapon.DEVGUN);
+      playerRef.get().equipWeapon(Weapon.DEVGUN);
+
+      // load the current wave
+      enemyManager.get().loadWave(currentWave);
     }
   }
 
