@@ -13,7 +13,7 @@ public abstract class GameEntity {
   public Collider.Hitbox[] colliders; // included to prevent object slicing, does not need to be initialized
   public boolean markForDelete = false;
   public PVector position = new PVector(0, 0);
-  protected float currentHealth;
+  public float currentHealth;
   protected Sprite sprite;
 
   /* constants for debugging */
@@ -80,10 +80,6 @@ public abstract class GameEntity {
         collider.setAngle(angle);
       }
     }
-  }
-
-  public final float getCurrentHealth() {
-    return currentHealth;
   }
 
   /* deals damage to the entity */

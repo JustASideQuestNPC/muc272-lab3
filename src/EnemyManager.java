@@ -5,8 +5,6 @@ import processing.data.JSONObject;
 import java.util.List;
 import java.util.function.Function;
 
-import static java.lang.Math.random;
-
 /* invisible entity that spawns enemies */
 public class EnemyManager extends GameEntity {
   private final JSONArray allWaveData; // json data for all waves
@@ -112,7 +110,7 @@ public class EnemyManager extends GameEntity {
       // guaranteed to run the code inside them at least once
       do {
         spawnPos.set(Main.randInt(minSpawnX, maxSpawnX), Main.randInt(minSpawnY, maxSpawnY));
-        playerDist.set(PVector.sub(spawnPos, Main.playerRef.get().position));
+        playerDist.set(PVector.sub(spawnPos, Main.player.get().position));
       } while (playerDist.magSq() < minPlayerDistanceSq || playerDist.magSq() > maxPlayerDistanceSq);
 
       Main.engine.addEntity(enemyCtor.apply(spawnPos));

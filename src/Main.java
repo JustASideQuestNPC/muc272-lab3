@@ -2,9 +2,7 @@ import processing.core.PApplet;
 import processing.data.JSONArray;
 
 import java.lang.ref.WeakReference;
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
+import java.util.*;
 
 public class Main extends PApplet {
   // nb: if something is a constant and should never be changed, it's convention to declare it as "static final" (unless
@@ -24,7 +22,7 @@ public class Main extends PApplet {
   public static final int WORLD_WIDTH = 2500;
   public static final int WORLD_HEIGHT = 2500;
   public static final int BORDER_WALL_THICKNESS = 100;
-  public static final List<Weapon> allWeapons = List.of(Weapon.values());
+  public static final ArrayList<Item> unequippedItems = new ArrayList<>(Arrays.asList(Item.values()));
 
   /* graphics constants */
   // colors are actually just normal ints, but Processing gives them their own datatype because very weird things
@@ -36,7 +34,7 @@ public class Main extends PApplet {
   public static final int MENU_BACKGROUND_COLOR = Colors.WHITE.getCode();
   // WeakReferences reference an object while still allowing it to be destroyed - if we just referenced the player
   // directly, the engine wouldn't be able to remove it until any references to it were set to null
-  public static WeakReference<Player> playerRef;
+  public static WeakReference<Player> player;
   // the enemy manager technically doesn't need a weak reference since it'll never be deleted, but it's a good habit
   // to have (it'll also prevent issues if something that deletes the enemy manager is added later)
   public static WeakReference<EnemyManager> enemyManager;
@@ -190,11 +188,11 @@ public class Main extends PApplet {
 
       // add player
       playerDead = false;
-      playerRef = new WeakReference<>(engine.addEntity(new Player(WORLD_WIDTH / 2f, WORLD_HEIGHT / 2f)));
-      engine.setCameraPos(playerRef.get().position.x, playerRef.get().position.y);
+      player = new WeakReference<>(engine.addEntity(new Player(WORLD_WIDTH / 2f, WORLD_HEIGHT / 2f)));
+      engine.setCameraPos(player.get().position.x, player.get().position.y);
 
       // give the player a weapon
-      playerRef.get().equipWeapon(Weapon.DEVGUN);
+      player.get().equipWeapon(Weapon.DEVGUN);
 
       // return to and load the first wave
       currentWave = 0;
@@ -256,15 +254,6 @@ public class Main extends PApplet {
     WAVE_COMPLETE,
     RUN_COMPLETE,
     GAME_OVER
-  }
-
-  /* returns a random weapon that isn't the weapon equipped on the player */
-  public static Weapon randomWeapon() {
-    Weapon weapon;
-    do {
-      weapon = allWeapons.get(random.nextInt(allWeapons.size()));
-    } while (weapon == playerRef.get().getWeapon());
-    return weapon;
   }
 
   // why did no one think to add a "random in range" function? if c++ has one then java has no excuse

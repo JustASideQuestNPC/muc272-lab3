@@ -1,6 +1,7 @@
 import processing.core.PVector;
 
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
 
 import static java.lang.Math.*;
 
@@ -9,34 +10,39 @@ public class Player extends GameEntity {
   // velocity has two caps, the soft cap and the hard cap. the soft cap is effectively the player's base movement speed,
   // and directional inputs have no effect if velocity is higher than it. other sources such as dashing can increase the
   // player's velocity above the soft cap, but not above the hard cap.
-  private static final float VELOCITY_SOFT_CAP = 750, VELOCITY_HARD_CAP = 1500; // pixels per second
+  private static final float BASE_VELOCITY_SOFT_CAP = 750, VELOCITY_HARD_CAP = 1500; // pixels per second
   private static final float MOVE_ACCELERATION = 3000, FRICTION = 1500;
   private static final float HIGH_SPEED_FRICTION_MULT = 2f; // increases friction when above the soft speed cap
-  private static final float VELOCITY_SOFT_CAP_SQ = VELOCITY_SOFT_CAP * VELOCITY_SOFT_CAP; // used during updates
   private static final float VELOCITY_HARD_CAP_SQ = VELOCITY_HARD_CAP * VELOCITY_HARD_CAP;
+  private float velocitySoftCap = BASE_VELOCITY_SOFT_CAP;
+  private float velocitySoftCapSq = velocitySoftCap * velocitySoftCap; // used during updates
 
   /* hp/damage vars */
-  public static final int MAX_HEALTH = 100;
+  public static final int BASE_MAX_HEALTH = 100;
+  public int maxHealth = BASE_MAX_HEALTH;
 
   /* stamina vars */
-  public static final int MAX_STAMINA = 1000;
+  public static final int BASE_MAX_STAMINA = 1000;
   // after stamina is fully drained, the player can't use abilities until they regain at least this much stamina
   public static final int STAMINA_FULL_DRAIN_PENALTY = 300;
   // whenever the player damages an enemy, they regain (damage * ON_HIT_STAMINA_REGEN_MULT) points of stamina
-  public static final float ON_HIT_STAMINA_REGEN_MULT = 0;
   public static final int PASSIVE_STAMINA_REGEN = 150; // points/second
   public static final int DASH_STAMINA_COST = 300;
-  public static final int SLOW_TIME_STAMINA_COST = 500; // points/second
+  public static final int SLOW_TIME_STAMINA_COST = 150; // points/second
   private static final float DASH_VELOCITY = 1500;
   private static final float DASH_DURATION = 0.05f; // dash duration in seconds
-  public static final float SLOW_TIME_ABILITY_DT_MULT = 0.2f;
+  public static final float SLOW_TIME_ABILITY_DT_MULT = 0.5f;
   public PVector velocity, onscreenPos;
   public float aimDirection;
   private Weapon weapon;
   private float dashMovementTimer;
-  private float currentStamina = MAX_STAMINA;
+  public int maxStamina = BASE_MAX_STAMINA;
+  public float currentStamina = maxStamina;
   private boolean passiveStaminaRegenAllowed = true;
   private boolean staminaPenaltyActive = false;
+
+  /* internal vars */
+  private final ArrayList<Item> items = new ArrayList<>();
 
   /* ctor */
   Player(PVector position) {
@@ -94,7 +100,7 @@ public class Player extends GameEntity {
         .setAngle(aimDirection)
         .setAngleOffset(PI / 2)
         .setScale(0.5);
-    currentHealth = MAX_HEALTH;
+    currentHealth = maxHealth;
   }
 
   /* overload that takes discrete x and y coordinates */
@@ -135,10 +141,10 @@ public class Player extends GameEntity {
         moveInput.setMag(MOVE_ACCELERATION * dt);
         // velocity is "soft capped", which means that normal movement can't increase it above a certain speed, but
         // other sources (such as dashing) can increase velocity past the soft cap up to the hard cap
-        if (velocity.magSq() <= VELOCITY_SOFT_CAP_SQ) {
+        if (velocity.magSq() <= velocitySoftCapSq) {
           velocity.add(moveInput);
           if (velocity.magSq() > VELOCITY_HARD_CAP_SQ) {
-            velocity.setMag(VELOCITY_SOFT_CAP);
+            velocity.setMag(velocitySoftCap);
           }
           applyFriction = false;
         }
@@ -146,7 +152,7 @@ public class Player extends GameEntity {
       // apply friction if necessary
       if (applyFriction) {
         float appliedFriction = FRICTION;
-        if (velocity.magSq() > VELOCITY_SOFT_CAP_SQ) appliedFriction *= HIGH_SPEED_FRICTION_MULT;
+        if (velocity.magSq() > velocitySoftCapSq) appliedFriction *= HIGH_SPEED_FRICTION_MULT;
         velocity.setMag(max(velocity.mag() - appliedFriction * dt, 0));
       }
     }
@@ -154,7 +160,8 @@ public class Player extends GameEntity {
     passiveStaminaRegenAllowed = true;
     if (Input.isActive("slow time") && currentStamina > 0 && !staminaPenaltyActive) {
       engine.setDtMult(SLOW_TIME_ABILITY_DT_MULT);
-      currentStamina -= SLOW_TIME_STAMINA_COST * dt;
+      // get the raw dt to make the ability cost accurate to realtime
+      currentStamina -= SLOW_TIME_STAMINA_COST * engine.deltaTimeRaw();
       passiveStaminaRegenAllowed = false;
     }
     else {
@@ -166,9 +173,9 @@ public class Player extends GameEntity {
     else if (currentStamina >= STAMINA_FULL_DRAIN_PENALTY) staminaPenaltyActive = false;
 
     // apply passive stamina regen
-    if (passiveStaminaRegenAllowed && currentStamina < MAX_STAMINA) {
+    if (passiveStaminaRegenAllowed && currentStamina < maxStamina) {
       currentStamina += PASSIVE_STAMINA_REGEN * dt;
-      if (currentStamina > MAX_STAMINA) currentStamina = MAX_STAMINA;
+      if (currentStamina > maxStamina) currentStamina = maxStamina;
     }
 
     // hard cap velocity just in case
@@ -207,10 +214,18 @@ public class Player extends GameEntity {
     engine.setCameraTarget(position);
   }
 
-  /* runs anything (abilities, equipment, etc) that gets triggered when the player *deals* (not takes) damage */
-  public void doOnHitEffects(int dealtDamage) {
-    // apply stamina regen bonus
-    currentStamina = min(currentStamina + dealtDamage * ON_HIT_STAMINA_REGEN_MULT, MAX_STAMINA);
+  /* runs anything (abilities, items, etc) that gets triggered when the player *deals* (not takes) damage */
+  public void doOnHitEffects(float dealtDamage) {
+    // trigger effects for all items - if the items doesn't do anything when this happens, its onDealDamage
+    // method will automatically do nothing
+    items.forEach((item) -> item.onDealDamage(this, dealtDamage));
+  }
+
+  /* runs anything (abilities, items, etc) that gets triggered when the player kills an enemy */
+  public void doOnKillEffects(GameEntity enemy) {
+    // trigger effects for all items - if the items doesn't do anything when this happens, its onKillEnemy
+    // method will automatically do nothing
+    items.forEach((item) -> item.onKillEnemy(this, enemy));
   }
 
   /* equips a new weapon */
@@ -219,16 +234,25 @@ public class Player extends GameEntity {
     weapon.player = new WeakReference<>(this);
   }
 
+  /* equips a new piece of items */
+  public void addItem(Item item) {
+    items.add(item);
+    // remove unique items from the item pool
+    if (item.isUnique()) Main.unequippedItems.remove(item);
+    item.onEquip(this);
+  }
+
   @Override
   public void damage(float dmg) {
     currentHealth -= dmg;
     if (currentHealth <= 0) {
       Main.playerDead = true;
     }
-  }
-
-  public float getCurrentStamina() {
-    return currentStamina;
+    else {
+      // trigger effects for all items - if the items doesn't do anything when this happens, its onTakeDamage
+      // method will automatically do nothing
+      items.forEach((item) -> item.onTakeDamage(this, dmg));
+    }
   }
 
   public boolean isStaminaPenaltyActive() {
@@ -237,5 +261,14 @@ public class Player extends GameEntity {
 
   public Weapon getWeapon() {
     return weapon;
+  }
+
+  /* used by items */
+  public void addTag(String tag) {
+    tags.add(tag);
+  }
+  public void modVelocitySoftCap(float amount) {
+    velocitySoftCap += amount;
+    velocitySoftCapSq = velocitySoftCap * velocitySoftCap;
   }
 }

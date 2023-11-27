@@ -2,6 +2,8 @@ import processing.core.PFont;
 import processing.core.PGraphics;
 import processing.core.PVector;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import static java.lang.Math.round;
@@ -15,6 +17,8 @@ public class Hud {
   private static Main.GameState state;
   private static final int CLICK_DELAY_FRAMES = 0;
   private static int clickDelayTimer = CLICK_DELAY_FRAMES;
+  private static ArrayList<Weapon> availableWeapons;
+  private static ArrayList<Item> availableItems;
 
   /* hashmaps to store hud elements */
   private static final HashMap<String, Button> buttons = new HashMap<>();
@@ -27,8 +31,8 @@ public class Hud {
 
   /* font stuff */
   // font objects - having a font object for each text size is generally preferred over using textSize()
-  public static PFont UAV_OSD_SANS_MONO_64, UAV_OSD_SANS_MONO_48, UAV_OSD_SANS_MONO_28, UAV_OSD_SANS_MONO_20,
-      OLNEY_LIGHT_16;
+  public static PFont UAV_OSD_SANS_MONO_64, UAV_OSD_SANS_MONO_48, UAV_OSD_SANS_MONO_28, UAV_OSD_SANS_MONO_24,
+      UAV_OSD_SANS_MONO_20, OLNEY_LIGHT_16;
   // file paths
   public static final String UAV_OSD_SANS_MONO_PATH = "fonts/UAV-OSD-Sans-Mono.ttf";
   public static final String OLNEY_LIGHT_PATH = "fonts/olney_light.otf";
@@ -45,6 +49,7 @@ public class Hud {
     UAV_OSD_SANS_MONO_64 = app.createFont(UAV_OSD_SANS_MONO_PATH, 64);
     UAV_OSD_SANS_MONO_48 = app.createFont(UAV_OSD_SANS_MONO_PATH, 48);
     UAV_OSD_SANS_MONO_28 = app.createFont(UAV_OSD_SANS_MONO_PATH, 28);
+    UAV_OSD_SANS_MONO_24 = app.createFont(UAV_OSD_SANS_MONO_PATH, 24);
     UAV_OSD_SANS_MONO_20 = app.createFont(UAV_OSD_SANS_MONO_PATH, 20);
     OLNEY_LIGHT_16 = app.createFont(OLNEY_LIGHT_PATH, 16);
 
@@ -253,6 +258,9 @@ public class Hud {
 
     // generate new items if a wave has been completed
     if (state == Main.GameState.WAVE_COMPLETE) {
+      availableWeapons = new ArrayList<>(Arrays.asList(Weapon.values()));
+      availableWeapons.remove(Main.player.get().getWeapon());
+      availableItems = new ArrayList<>(Main.unequippedItems);
       for (int i = 0; i < upgrades.length; ++i) {
         upgrades[i] = new UpgradeHolder();
       }
@@ -303,7 +311,10 @@ public class Hud {
             UpgradeHolder upgrade = upgrades[i];
             if (buttons.get(buttonName).isPressed()) {
               if (upgrade.isWeapon) {
-                Main.playerRef.get().equipWeapon(upgrade.weapon);
+                Main.player.get().equipWeapon(upgrade.weapon);
+              }
+              else {
+                Main.player.get().addItem(upgrade.item);
               }
               // start the next wave and unpause
               Main.enemyManager.get().loadWave(Main.currentWave);
@@ -340,51 +351,51 @@ public class Hud {
         sprites.get("stamina bar icon").render(pg);
         int staminaBarXPos = 60;
         int staminaBarYPos = height - 40;
-        int staminaBarWidth = 400;
+        int staminaBarWidth = Main.player.get().maxStamina / 5;
         int staminaBarHeight = 15;
 
         pg.noStroke();
-        if (Main.playerRef.get().isStaminaPenaltyActive()) {
+        if (Main.player.get().isStaminaPenaltyActive()) {
           pg.fill(Colors.TRANS_DARK_RED.getCode());
         }
         else {
           pg.fill(Colors.TRANS_MEDIUM_TEAL.getCode());
         }
         pg.rect(staminaBarXPos, staminaBarYPos, staminaBarWidth, staminaBarHeight);
-        if (Main.playerRef.get().isStaminaPenaltyActive()) {
+        if (Main.player.get().isStaminaPenaltyActive()) {
           pg.fill(Colors.DARK_RED.getCode());
         }
         else {
           pg.fill(Colors.MEDIUM_TEAL.getCode());
         }
-        pg.rect(staminaBarXPos, staminaBarYPos, (int)((float)staminaBarWidth / Player.MAX_STAMINA *
-            Main.playerRef.get().getCurrentStamina() + 0.5), staminaBarHeight);
+        pg.rect(staminaBarXPos, staminaBarYPos, (int)((float)staminaBarWidth / Main.player.get().maxStamina *
+            Main.player.get().currentStamina + 0.5), staminaBarHeight);
 
         // display player hp
         sprites.get("hp bar icon").render(pg);
         int hpBarXPos = 60;
         int hpBarYPos = height - 88;
-        int hpBarWidth = 200;
+        int hpBarWidth = Main.player.get().maxHealth * 2;
         int hpBarHeight = 15;
 
         pg.noStroke();
         pg.fill(Colors.TRANS_RED.getCode());
         pg.rect(hpBarXPos, hpBarYPos, hpBarWidth, hpBarHeight);
         pg.fill(Colors.RED.getCode());
-        pg.rect(hpBarXPos, hpBarYPos, (int)((float)hpBarWidth / Player.MAX_HEALTH *
-            Main.playerRef.get().getCurrentHealth() + 0.5), hpBarHeight);
+        pg.rect(hpBarXPos, hpBarYPos, (int)((float)hpBarWidth / Main.player.get().maxHealth *
+            Main.player.get().currentHealth + 0.5), hpBarHeight);
 
         // draw indicators pointing to certain enemies
         int enemyIndicatorDistance = 100;
         float enemyIndicatorSize = 50;
         pg.pushMatrix();
-        pg.translate(Main.playerRef.get().onscreenPos.x, Main.playerRef.get().onscreenPos.y);
+        pg.translate(Main.player.get().onscreenPos.x, Main.player.get().onscreenPos.y);
         pg.noStroke();
         pg.fill(Colors.TRANS_RED.getCode());
 
         for (GameEntity ent : Main.engine.getTagged("has hud direction indicator")) {
           if (!ent.isOnscreen()) {
-            PVector dir = PVector.sub(ent.position, Main.playerRef.get().position);
+            PVector dir = PVector.sub(ent.position, Main.player.get().position);
             pg.pushMatrix();
             pg.rotate(dir.heading() + PI / 2);
             pg.triangle(0, -enemyIndicatorDistance - enemyIndicatorSize / 2,
@@ -425,15 +436,15 @@ public class Hud {
             pg.fill(Colors.WHITE.getCode());
             pg.stroke(Colors.BLACK.getCode());
             pg.strokeWeight(4);
-            pg.rect(Input.mousePos.x, Input.mousePos.y, 300, upgrades[i].tooltipHeight);
+            pg.rect(Input.mousePos.x, Input.mousePos.y, 350, upgrades[i].tooltipHeight);
             pg.noStroke();
             pg.fill(Colors.BLACK.getCode());
             pg.textAlign(LEFT, TOP);
-            pg.textFont(UAV_OSD_SANS_MONO_28);
+            pg.textFont(UAV_OSD_SANS_MONO_24);
             pg.text(upgrades[i].name, Input.mousePos.x + 10, Input.mousePos.y + 10);
             pg.fill(Colors.DARK_TEAL.getCode());
             pg.textFont(OLNEY_LIGHT_16);
-            pg.text(upgrades[i].description, Input.mousePos.x + 10, Input.mousePos.y + 50, 280, 1000);
+            pg.text(upgrades[i].description, Input.mousePos.x + 10, Input.mousePos.y + 50, 330, 1000);
           }
         }
         break;
@@ -459,17 +470,39 @@ public class Hud {
   private static class UpgradeHolder {
     public boolean isWeapon;
     public Weapon weapon;
+    public Item item;
     public String name, description;
     public int tooltipHeight;
 
     UpgradeHolder() {
       // generate a random weapon or upgrade (once upgrades have actually been added)
-      isWeapon = true;
-      weapon = Main.randomWeapon();
-      name = weapon.getName();
-      description = weapon.getDescription();
-      tooltipHeight = Hud.textHeight(description, OLNEY_LIGHT_16, 280) + 50;
+      isWeapon = Main.randInt(0, 2) == 0;
+      if (isWeapon) {
+        weapon = randomWeapon();
+        name = weapon.getName();
+        description = weapon.getDescription();
+      }
+      else {
+        item = randomItem();
+        name = item.getName();
+        description = item.getDescription();
+      }
+      tooltipHeight = Hud.textHeight(description, OLNEY_LIGHT_16, 330) + 50;
     }
+  }
+
+  /* returns a random weapon that isn't equipped by the player, and that hasn't been already assigned to an upgrade */
+  private static Weapon randomWeapon() {
+    Weapon weapon = availableWeapons.get(Main.randInt(0, availableWeapons.size()));
+    availableWeapons.remove(weapon);
+    return weapon;
+  }
+
+  /* returns a random upgrade that is non-unique or that hasn't been equipped by the player */
+  private static Item randomItem() {
+    Item item = availableItems.get(Main.randInt(0, availableItems.size()));
+    availableItems.remove(item);
+    return item;
   }
 
   /* IT SHOULD NOT BE THIS HARD TO FIND OUT HOW TALL A BOX NEEDS TO BE. */

@@ -31,7 +31,7 @@ public enum Weapon {
     0,
     50,
     "Pistol",
-    "A basic handgun. High damage and accuracy with a middling rate of fire."
+    "A basic handgun. High damage and accuracy with a reasonable rate of fire."
   ),
 
   AKM(
@@ -46,6 +46,20 @@ public enum Weapon {
     25,
     "AKM",
     "Every insurgent's favorite tool."
+  ),
+
+  SHOTGUN(
+      FireMode.SEMI,
+      360,
+      0,
+      1200,
+      25,
+      12,
+      1,
+      0,
+      6,
+      "SPAS-12",
+      "According to Half-Life, the magazine tube is also a barrel."
   );
 
   private final FireMode fireMode;
@@ -55,7 +69,7 @@ public enum Weapon {
   private final int bulletsPerShot, shotsPerBurst;
   private final float spreadRange, halfSpreadRange;
   private final float recoilImpulse;
-  private final int damagePerShot;
+  private final float damagePerShot;
   public WeakReference<Player> player;
   private float fireTimer, burstTimer;
   private int shotsRemaining = 0;
@@ -65,7 +79,7 @@ public enum Weapon {
 
   /* ctor */
   Weapon(FireMode fireMode, int roundsPerMinute, int burstsPerMinute, int muzzleVelocity, int spreadAngle,
-         int bulletsPerShot, int shotsPerBurst, int recoilImpulse, int damagePerShot, String name,
+         int bulletsPerShot, int shotsPerBurst, int recoilImpulse, float damagePerShot, String name,
          String description) {
     this.fireMode = fireMode;
     secondsPerRound = 1 / (roundsPerMinute / 60f);
@@ -80,8 +94,11 @@ public enum Weapon {
     this.damagePerShot = damagePerShot;
     this.name = name;
     int accuracyPercentage = (int)(((float)(90 - spreadAngle) / 90) * 100);
-    this.description = String.format("%s\nDamage: %d\nAccuracy: %d%%\nRate of Fire: %d RPM",
-                                     description, damagePerShot, accuracyPercentage, roundsPerMinute);
+    // if the weapon is a shotgun, the damage is displayed as "[damage per pellet]x[number of pellets]"
+    String damageStr = Float.toString(damagePerShot);
+    if (bulletsPerShot > 1) damageStr += "x" + Integer.toString(bulletsPerShot);
+    this.description = String.format("%s\nDamage: %s\nAccuracy: %d%%\nRate of Fire: %d RPM",
+                                     description, damageStr, accuracyPercentage, roundsPerMinute);
 
     // set input checker based on firemode
     if (this.fireMode == FireMode.AUTO) {
@@ -144,16 +161,17 @@ public enum Weapon {
     }
   }
 
-  /* determines what input mode is used */
-  public enum FireMode {
-    SEMI,
-    AUTO,
-  }
   public String getName() {
     return name;
   }
 
   public String getDescription() {
     return description;
+  }
+
+  /* determines what input mode is used */
+  public enum FireMode {
+    SEMI,
+    AUTO,
   }
 }

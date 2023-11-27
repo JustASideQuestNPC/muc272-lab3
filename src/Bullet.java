@@ -7,12 +7,12 @@ public class Bullet extends GameEntity {
 
   // yes, i'm aware that i could name this "damage", but having a variable with the same name as a method is wrong on so
   // many levels. i have far too much dignity to stoop that low...unlike the processing devs.
-  public final int impactDamage;
+  public final float impactDamage;
 
   private final boolean shotByPlayer; // determines what the bullet damages and if it triggers on-hit effects
 
   /* ctor */
-  Bullet(PVector position, PVector velocity, int impactDamage, boolean shotByPlayer) {
+  Bullet(PVector position, PVector velocity, float impactDamage, boolean shotByPlayer) {
     super("bullet"); // initialize tag list
     this.position = position.copy();
     this.velocity = velocity;
@@ -52,15 +52,18 @@ public class Bullet extends GameEntity {
       for (GameEntity enemy : engine.getTagged("enemy")) {
         if (colliding(enemy)) {
           enemy.damage(impactDamage);
-          Main.playerRef.get().doOnHitEffects(impactDamage);
+          Main.player.get().doOnHitEffects(impactDamage);
+          // trigger on-kill effects if the enemy was killed - the enemy is passed because some equipment only activates
+          // when more powerful enemies are killed
+          if (enemy.markForDelete) Main.player.get().doOnKillEffects(enemy);
           markForDelete = true;
           return;
         }
       }
     }
     else {
-      if (colliding(Main.playerRef.get())) {
-        Main.playerRef.get().damage(impactDamage);
+      if (colliding(Main.player.get())) {
+        Main.player.get().damage(impactDamage);
         markForDelete = true;
       }
     }
