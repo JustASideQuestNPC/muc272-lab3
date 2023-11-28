@@ -1,4 +1,5 @@
 import processing.core.PApplet;
+import processing.core.PImage;
 import processing.data.JSONArray;
 
 import java.lang.ref.WeakReference;
@@ -16,6 +17,7 @@ public class Main extends PApplet {
 
   /* debug stuff */
   public static boolean VERBOSE = false;
+  public static boolean FORCE_DEBUG_WAVE = true; // loads wave 0, which is reserved for testing and debugging
 
   /* engine/world constants */
   private static final Random random = new Random();
@@ -41,7 +43,7 @@ public class Main extends PApplet {
   public static boolean paused = false;
   public static boolean playerDead = false;
   public static Engine engine;
-  public static int currentWave = 0;
+  public static int currentWave;
   public static int numWaves;
   public static GameState gameState = GameState.MAIN_MENU;
 
@@ -195,7 +197,7 @@ public class Main extends PApplet {
       player.get().equipWeapon(Weapon.DEVGUN);
 
       // return to and load the first wave
-      currentWave = 0;
+      currentWave = FORCE_DEBUG_WAVE ? 0 : 1;
       enemyManager.get().loadWave(currentWave);
     }
   }

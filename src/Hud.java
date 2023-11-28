@@ -1,5 +1,6 @@
 import processing.core.PFont;
 import processing.core.PGraphics;
+import processing.core.PImage;
 import processing.core.PVector;
 
 import java.util.ArrayList;
@@ -7,6 +8,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import static java.lang.Math.round;
+import static java.lang.Math.tan;
 import static processing.core.PConstants.*;
 
 /* displays and updates hud and ui */
@@ -256,6 +258,14 @@ public class Hud {
       b.setHovered(false);
     }
 
+    // disable the cursor during gameplay
+    if (state == Main.GameState.GAMEPLAY) {
+      app.noCursor();
+    }
+    else {
+      app.cursor(ARROW);
+    }
+
     // generate new items if a wave has been completed
     if (state == Main.GameState.WAVE_COMPLETE) {
       availableWeapons = new ArrayList<>(Arrays.asList(Weapon.values()));
@@ -411,8 +421,45 @@ public class Hud {
         pg.fill(Colors.BLACK.getCode());
         pg.textAlign(LEFT, BOTTOM);
         pg.textFont(UAV_OSD_SANS_MONO_20);
-        pg.text(String.format("Wave %d", Main.currentWave + 1), 10, height - 110);
+        pg.text(String.format("Wave %d\n%d Enemies", Main.currentWave, Main.enemyManager.get().getRemainingEnemies()),
+                10, height - 110);
 
+        // draw a reticle to show where the player is aiming
+        pg.pushMatrix();
+        pg.translate(Input.mousePos.x, Input.mousePos.y);
+        pg.rotate(Main.player.get().aimDirection);
+
+        pg.pushMatrix();
+        pg.rotate(PI / 4);
+        pg.noStroke();
+        pg.fill(Colors.TRANS_RED.getCode());
+        pg.rect(-5, -5, 10, 10);
+        pg.popMatrix();
+
+        // if the weapon isn't a 0-spread weapon, draw indicators to show the spread width at the cursor
+        if (Main.player.get().getWeapon().getHalfSpreadRange() > 0) {
+          float reticleSize = (float)(PVector.dist(Input.mousePos, Main.player.get().onscreenPos)
+                        * tan(Main.player.get().getWeapon().getHalfSpreadRange()));
+
+          pg.beginShape();
+          pg.vertex(20, -reticleSize);
+          pg.vertex(0, -reticleSize - 20);
+          pg.vertex(-20, -reticleSize);
+          pg.vertex(-10, -reticleSize);
+          pg.vertex(0, -reticleSize - 10);
+          pg.vertex(10, -reticleSize);
+          pg.endShape(CLOSE);
+
+          pg.beginShape();
+          pg.vertex(20, reticleSize);
+          pg.vertex(0, reticleSize + 20);
+          pg.vertex(-20, reticleSize);
+          pg.vertex(-10, reticleSize);
+          pg.vertex(0, reticleSize + 10);
+          pg.vertex(10, reticleSize);
+          pg.endShape(CLOSE);
+        }
+        pg.popMatrix();
         break;
       case MAIN_MENU:
         pg.textFont(UAV_OSD_SANS_MONO_64);

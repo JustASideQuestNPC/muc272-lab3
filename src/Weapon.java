@@ -169,6 +169,10 @@ public enum Weapon {
     return description;
   }
 
+  public float getHalfSpreadRange() {
+    return halfSpreadRange;
+  }
+
   /* determines what input mode is used */
   public enum FireMode {
     SEMI,

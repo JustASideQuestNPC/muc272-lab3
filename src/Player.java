@@ -1,3 +1,4 @@
+import processing.core.PGraphics;
 import processing.core.PVector;
 
 import java.lang.ref.WeakReference;

@@ -9,6 +9,7 @@ import java.util.function.Function;
 public class EnemyManager extends GameEntity {
   private final JSONArray allWaveData; // json data for all waves
   private boolean completed;
+  private int remainingEnemies;
 
   // cache a list of all enemy types to prevent copying this on every frame
   private static final List<EnemyType> enemyTypes = List.of(EnemyType.values());
@@ -18,10 +19,6 @@ public class EnemyManager extends GameEntity {
     super("purge exempt");
 
     this.allWaveData = allWaveData;
-
-    // hard-coded wave info for debugging
-    EnemyType.CHASER.setNumInWave(Integer.MAX_VALUE);
-    EnemyType.CHASER.setMaxActive(1);
   }
 
   // loads a wave, throws an IllegalArgumentException if the wave at that number doesn't exist
@@ -44,16 +41,22 @@ public class EnemyManager extends GameEntity {
   }
 
   public void update(float dt) {
-    completed = true;
+    completed = !Main.FORCE_DEBUG_WAVE;
+    remainingEnemies = 0;
     // do update checks for each enemy type, also check if the wave has been completed
     for (EnemyType enemyType : EnemyType.values()) {
       enemyType.update(dt);
+      remainingEnemies += enemyType.getNumInWave();
       if (!enemyType.completed) completed = false;
     }
   }
 
   public boolean waveFinished() {
     return completed;
+  }
+
+  public int getRemainingEnemies() {
+    return remainingEnemies;
   }
 
   /* I can't decide whether this is the most elegant piece of code I've ever written, or the most terrifying...probably
@@ -129,6 +132,10 @@ public class EnemyManager extends GameEntity {
 
     public void setMaxActive(int maxActive) {
       this.maxActive = maxActive;
+    }
+
+    public int getNumInWave() {
+      return numInWave;
     }
 
     public String getName() {

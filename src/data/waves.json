@@ -1,7 +1,10 @@
 [
   {
+
+  },
+  {
     "chaser": {
-      "total"     : 0,
+      "total"     : 3,
       "max active": 1
     }
   },
