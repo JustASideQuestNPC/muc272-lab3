@@ -69,6 +69,14 @@ public class EnemyManager extends GameEntity {
         0.5f,
         400,
         10000
+    ),
+    TURRET(
+        "turret",
+        TurretEnemy::new,
+        200,
+        1,
+        750,
+        10000
     );
 
     private final String name; // name of the enemy, used for loading wave data

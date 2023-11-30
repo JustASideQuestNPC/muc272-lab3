@@ -1,6 +1,9 @@
 [
   {
-
+    "turret": {
+      "total":      1000,
+      "max active":    1
+    }
   },
   {
     "chaser": {

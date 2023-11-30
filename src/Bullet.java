@@ -8,7 +8,7 @@ public class Bullet extends GameEntity {
   // yes, i'm aware that i could name this "damage", but having a variable with the same name as a method is wrong on so
   // many levels. i have far too much dignity to stoop that low...unlike the processing devs.
   public final float impactDamage;
-
+  private final int color;
   private final boolean shotByPlayer; // determines what the bullet damages and if it triggers on-hit effects
 
   /* ctor */
@@ -18,6 +18,8 @@ public class Bullet extends GameEntity {
     this.velocity = velocity;
     this.impactDamage = impactDamage;
     this.shotByPlayer = shotByPlayer;
+    if (shotByPlayer) color = Colors.BLACK.getCode();
+    else color = Colors.RED.getCode();
     colliders = new Collider.Hitbox[]{new Collider.Hitbox(position.copy(), new PVector(0, 0))};
   }
 
@@ -26,7 +28,7 @@ public class Bullet extends GameEntity {
   public void render(PGraphics pg) {
     super.render(pg);
     pg.noStroke();
-    pg.fill(Colors.RED.getCode());
+    pg.fill(color);
     pg.ellipse(position.x, position.y, 10, 10);
   }
 
