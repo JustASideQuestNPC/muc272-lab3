@@ -1,6 +1,8 @@
 import processing.core.PGraphics;
 import processing.core.PVector;
 
+import java.util.Objects;
+
 import static java.lang.Math.atan2;
 import static processing.core.PConstants.PI;
 
@@ -93,8 +95,8 @@ public class TurretEnemy extends EnemySuper {
   @Override
   public void update(float dt) {
     // aim at the player
-    angle = (float)atan2(Main.player.get().position.y - position.y,
-                         Main.player.get().position.x - position.x);
+    angle = (float)atan2(Objects.requireNonNull(Main.player.get()).position.y - position.y,
+                         Objects.requireNonNull(Main.player.get()).position.x - position.x);
 
     // if shots are on cooldown, update the timer
     if (shotCooldown > 0) {

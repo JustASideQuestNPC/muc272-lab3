@@ -1,6 +1,8 @@
 import processing.core.PGraphics;
 import processing.core.PVector;
 
+import java.util.Objects;
+
 /* bullet fired by playerRef.get() weapons */
 public class Bullet extends GameEntity {
   public PVector velocity;
@@ -54,10 +56,10 @@ public class Bullet extends GameEntity {
       for (GameEntity enemy : engine.getTagged("enemy")) {
         if (colliding(enemy)) {
           enemy.damage(impactDamage);
-          Main.player.get().doOnHitEffects(impactDamage);
+          Objects.requireNonNull(Main.player.get()).doOnHitEffects(impactDamage);
           // trigger on-kill effects if the enemy was killed - the enemy is passed because some equipment only activates
           // when more powerful enemies are killed
-          if (enemy.markForDelete) Main.player.get().doOnKillEffects(enemy);
+          if (enemy.markForDelete) Objects.requireNonNull(Main.player.get()).doOnKillEffects(enemy);
           markForDelete = true;
           return;
         }
@@ -65,7 +67,7 @@ public class Bullet extends GameEntity {
     }
     else {
       if (colliding(Main.player.get())) {
-        Main.player.get().damage(impactDamage);
+        Objects.requireNonNull(Main.player.get()).damage(impactDamage);
         markForDelete = true;
       }
     }

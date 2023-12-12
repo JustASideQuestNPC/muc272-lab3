@@ -21,9 +21,7 @@ public class SoundManager {
 
   /* loads all sound effects into soundfiles that can be played */
   public static void init(PApplet app) {
-    filePaths.forEach((k, v) -> {
-      soundFiles.put(k, new SoundFile(app, v));
-    });
+    filePaths.forEach((k, v) -> soundFiles.put(k, new SoundFile(app, v)));
   }
 
   /* plays a sound effect if it isn't already playing; throws an exception if the effect doesn't exist. */

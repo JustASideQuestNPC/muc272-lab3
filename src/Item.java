@@ -103,6 +103,6 @@ public enum Item {
   // it doesn't. all the most common interface formats are covered and new ones obviously aren't hard to implement.
   @FunctionalInterface
   interface BiConsumer <T, U> {
-    public void accept(T arg1, U arg2);
+    void accept(T arg1, U arg2);
   }
 }

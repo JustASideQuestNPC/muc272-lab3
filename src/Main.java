@@ -144,7 +144,7 @@ public class Main extends PApplet {
       if (playerDead) setState(GameState.GAME_OVER);
 
       // check if the wave has been completed
-      if (enemyManager.get().waveFinished() && !paused) {
+      if (Objects.requireNonNull(enemyManager.get()).waveFinished() && !paused) {
         ++currentWave;
         if (currentWave < numWaves) {
           paused = true;
@@ -195,14 +195,14 @@ public class Main extends PApplet {
       // add player
       playerDead = false;
       player = new WeakReference<>(engine.addEntity(new Player(WORLD_WIDTH / 2f, WORLD_HEIGHT / 2f)));
-      engine.setCameraPos(player.get().position.x, player.get().position.y);
+      engine.setCameraPos(Objects.requireNonNull(player.get()).position.x, Objects.requireNonNull(player.get()).position.y);
 
       // give the player a weapon
-      player.get().equipWeapon(Weapon.DEVGUN);
+      Objects.requireNonNull(player.get()).equipWeapon(Weapon.DEVGUN);
 
       // return to and load the first wave
       currentWave = FORCE_DEBUG_WAVE ? 0 : 1;
-      enemyManager.get().loadWave(currentWave);
+      Objects.requireNonNull(enemyManager.get()).loadWave(currentWave);
     }
 
     Hud.setState(newState);
@@ -267,6 +267,6 @@ public class Main extends PApplet {
 
   // why did no one think to add a "random in range" function? if c++ has one then java has no excuse
   public static int randInt(int min, int max) {
-    return random.nextInt(max - min) + min;
+    return random.nextInt(min, max);
   }
 }

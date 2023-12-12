@@ -1,6 +1,7 @@
 import processing.core.PVector;
 
 import java.lang.ref.WeakReference;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import static java.lang.Math.*;
@@ -96,7 +97,7 @@ public enum Weapon {
     int accuracyPercentage = (int)(((float)(90 - spreadAngle) / 90) * 100);
     // if the weapon is a shotgun, the damage is displayed as "[damage per pellet]x[number of pellets]"
     String damageStr = Float.toString(damagePerShot);
-    if (bulletsPerShot > 1) damageStr += "x" + Integer.toString(bulletsPerShot);
+    if (bulletsPerShot > 1) damageStr += "x" + bulletsPerShot;
     this.description = String.format("%s\nDamage: %s\nAccuracy: %d%%\nRate of Fire: %d RPM",
                                      description, damageStr, accuracyPercentage, roundsPerMinute);
 
@@ -150,13 +151,13 @@ public enum Weapon {
   /* fires bullets */
   private void fireShot() {
     for (int i = 0; i < bulletsPerShot; ++i) {
-      float fireAngle = player.get().aimDirection + (float)(random() * spreadRange) - halfSpreadRange;
+      float fireAngle = Objects.requireNonNull(player.get()).aimDirection + (float)(random() * spreadRange) - halfSpreadRange;
       PVector velocity = PVector.mult(PVector.fromAngle(fireAngle), muzzleVelocity);
-      Main.engine.addEntity(new Bullet(player.get().position, velocity, damagePerShot, true));
+      Main.engine.addEntity(new Bullet(Objects.requireNonNull(player.get()).position, velocity, damagePerShot, true));
       // if the weapon has recoil, apply it to the player
       if (recoilImpulse != 0) {
         PVector impulse = PVector.mult(PVector.fromAngle(fireAngle), -recoilImpulse);
-        player.get().velocity.add(impulse);
+        Objects.requireNonNull(player.get()).velocity.add(impulse);
       }
       SoundManager.play("shoot");
     }

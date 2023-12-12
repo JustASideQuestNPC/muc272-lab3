@@ -3,6 +3,7 @@ import processing.data.JSONArray;
 import processing.data.JSONObject;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 
 /* invisible entity that spawns enemies */
@@ -121,7 +122,7 @@ public class EnemyManager extends GameEntity {
       // guaranteed to run the code inside them at least once
       do {
         spawnPos.set(Main.randInt(minSpawnX, maxSpawnX), Main.randInt(minSpawnY, maxSpawnY));
-        playerDist.set(PVector.sub(spawnPos, Main.player.get().position));
+        playerDist.set(PVector.sub(spawnPos, Objects.requireNonNull(Main.player.get()).position));
       } while (playerDist.magSq() < minPlayerDistanceSq || playerDist.magSq() > maxPlayerDistanceSq);
 
       Main.engine.addEntity(enemyCtor.apply(spawnPos));

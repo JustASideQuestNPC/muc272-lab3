@@ -1,14 +1,14 @@
 import processing.core.PFont;
 import processing.core.PGraphics;
-import processing.core.PImage;
 import processing.core.PVector;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Objects;
 
-import static java.lang.Math.round;
 import static java.lang.Math.tan;
+import static java.lang.Math.round;
 import static processing.core.PConstants.*;
 
 /* displays and updates hud and ui */
@@ -298,7 +298,7 @@ public class Hud {
     // disable the cursor during gameplay
     if (state == Main.GameState.GAMEPLAY) {
       app.noCursor();
-      Main.player.get().fireLockoutTimer = Player.FIRE_LOCKOUT_DURATION;
+      Objects.requireNonNull(Main.player.get()).fireLockoutTimer = Player.FIRE_LOCKOUT_DURATION;
     }
     else {
       app.cursor(ARROW);
@@ -307,7 +307,7 @@ public class Hud {
     // generate new items if a wave has been completed
     if (state == Main.GameState.WAVE_COMPLETE) {
       availableWeapons = new ArrayList<>(Arrays.asList(Weapon.values()));
-      availableWeapons.remove(Main.player.get().getWeapon());
+      availableWeapons.remove(Objects.requireNonNull(Main.player.get()).getWeapon());
       availableItems = new ArrayList<>(Main.unequippedItems);
       for (int i = 0; i < upgrades.length; ++i) {
         upgrades[i] = new UpgradeHolder();
@@ -365,14 +365,19 @@ public class Hud {
             UpgradeHolder upgrade = upgrades[i];
             if (buttons.get(buttonName).isPressed()) {
               if (upgrade.isWeapon) {
-                Main.player.get().equipWeapon(upgrade.weapon);
+                Objects.requireNonNull(Main.player.get()).equipWeapon(upgrade.weapon);
               }
               else {
-                Main.player.get().addItem(upgrade.item);
+                Objects.requireNonNull(Main.player.get()).addItem(upgrade.item);
               }
               // start the next wave and unpause
-              Main.enemyManager.get().loadWave(Main.currentWave);
+              Objects.requireNonNull(Main.enemyManager.get()).loadWave(Main.currentWave);
               Main.paused = false;
+              Objects.requireNonNull(Main.player.get()).currentHealth += 35;
+              if (Objects.requireNonNull(Main.player.get()).currentHealth > Objects.requireNonNull(Main.player.get()).maxHealth) {
+                Objects.requireNonNull(Main.player.get()).currentHealth = Objects.requireNonNull(Main.player.get()).maxHealth;
+              }
+
               setState(Main.GameState.GAMEPLAY);
               SoundManager.play("get upgrade");
             }
@@ -411,51 +416,51 @@ public class Hud {
         sprites.get("stamina bar icon").render(pg);
         int staminaBarXPos = 60;
         int staminaBarYPos = height - 40;
-        int staminaBarWidth = Main.player.get().maxStamina / 5;
+        int staminaBarWidth = Objects.requireNonNull(Main.player.get()).maxStamina / 5;
         int staminaBarHeight = 15;
 
         pg.noStroke();
-        if (Main.player.get().isStaminaPenaltyActive()) {
+        if (Objects.requireNonNull(Main.player.get()).isStaminaPenaltyActive()) {
           pg.fill(Colors.TRANS_DARK_RED.getCode());
         }
         else {
           pg.fill(Colors.TRANS_MEDIUM_TEAL.getCode());
         }
         pg.rect(staminaBarXPos, staminaBarYPos, staminaBarWidth, staminaBarHeight);
-        if (Main.player.get().isStaminaPenaltyActive()) {
+        if (Objects.requireNonNull(Main.player.get()).isStaminaPenaltyActive()) {
           pg.fill(Colors.DARK_RED.getCode());
         }
         else {
           pg.fill(Colors.MEDIUM_TEAL.getCode());
         }
-        pg.rect(staminaBarXPos, staminaBarYPos, (int)((float)staminaBarWidth / Main.player.get().maxStamina *
-            Main.player.get().currentStamina + 0.5), staminaBarHeight);
+        pg.rect(staminaBarXPos, staminaBarYPos, (int)((float)staminaBarWidth / Objects.requireNonNull(Main.player.get()).maxStamina *
+                                                      Objects.requireNonNull(Main.player.get()).currentStamina + 0.5), staminaBarHeight);
 
         // display player hp
         sprites.get("hp bar icon").render(pg);
         int hpBarXPos = 60;
         int hpBarYPos = height - 88;
-        int hpBarWidth = Main.player.get().maxHealth * 2;
+        int hpBarWidth = Objects.requireNonNull(Main.player.get()).maxHealth * 2;
         int hpBarHeight = 15;
 
         pg.noStroke();
         pg.fill(Colors.TRANS_RED.getCode());
         pg.rect(hpBarXPos, hpBarYPos, hpBarWidth, hpBarHeight);
         pg.fill(Colors.RED.getCode());
-        pg.rect(hpBarXPos, hpBarYPos, (int)((float)hpBarWidth / Main.player.get().maxHealth *
-            Main.player.get().currentHealth + 0.5), hpBarHeight);
+        pg.rect(hpBarXPos, hpBarYPos, (int)((float)hpBarWidth / Objects.requireNonNull(Main.player.get()).maxHealth *
+                                            Objects.requireNonNull(Main.player.get()).currentHealth + 0.5), hpBarHeight);
 
         // draw indicators pointing to certain enemies
         int enemyIndicatorDistance = 100;
         float enemyIndicatorSize = 50;
         pg.pushMatrix();
-        pg.translate(Main.player.get().onscreenPos.x, Main.player.get().onscreenPos.y);
+        pg.translate(Objects.requireNonNull(Main.player.get()).onscreenPos.x, Objects.requireNonNull(Main.player.get()).onscreenPos.y);
         pg.noStroke();
         pg.fill(Colors.TRANS_RED.getCode());
 
         for (GameEntity ent : Main.engine.getTagged("has hud direction indicator")) {
           if (!ent.isOnscreen()) {
-            PVector dir = PVector.sub(ent.position, Main.player.get().position);
+            PVector dir = PVector.sub(ent.position, Objects.requireNonNull(Main.player.get()).position);
             pg.pushMatrix();
             pg.rotate(dir.heading() + PI / 2);
             pg.triangle(0, -enemyIndicatorDistance - enemyIndicatorSize / 2,
@@ -471,13 +476,13 @@ public class Hud {
         pg.fill(Colors.BLACK.getCode());
         pg.textAlign(LEFT, BOTTOM);
         pg.textFont(UAV_OSD_SANS_MONO_20);
-        pg.text(String.format("Wave %d\n%d Enemies", Main.currentWave, Main.enemyManager.get().getRemainingEnemies()),
+        pg.text(String.format("Wave %d\n%d Enemies", Main.currentWave, Objects.requireNonNull(Main.enemyManager.get()).getRemainingEnemies()),
                 10, height - 110);
 
         // draw a reticle to show where the player is aiming
         pg.pushMatrix();
         pg.translate(Input.mousePos.x, Input.mousePos.y);
-        pg.rotate(Main.player.get().aimDirection);
+        pg.rotate(Objects.requireNonNull(Main.player.get()).aimDirection);
 
         pg.pushMatrix();
         pg.rotate(PI / 4);
@@ -487,9 +492,9 @@ public class Hud {
         pg.popMatrix();
 
         // if the weapon isn't a 0-spread weapon, draw indicators to show the spread width at the cursor
-        if (Main.player.get().getWeapon().getHalfSpreadRange() > 0) {
-          float reticleSize = (float)(PVector.dist(Input.mousePos, Main.player.get().onscreenPos)
-                        * tan(Main.player.get().getWeapon().getHalfSpreadRange()));
+        if (Objects.requireNonNull(Main.player.get()).getWeapon().getHalfSpreadRange() > 0) {
+          float reticleSize = (float)(PVector.dist(Input.mousePos, Objects.requireNonNull(Main.player.get()).onscreenPos)
+                        * tan(Objects.requireNonNull(Main.player.get()).getWeapon().getHalfSpreadRange()));
 
           pg.beginShape();
           pg.vertex(20, -reticleSize);
