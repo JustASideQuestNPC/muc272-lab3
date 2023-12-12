@@ -158,6 +158,7 @@ public enum Weapon {
         PVector impulse = PVector.mult(PVector.fromAngle(fireAngle), -recoilImpulse);
         player.get().velocity.add(impulse);
       }
+      SoundManager.play("shoot");
     }
   }
 

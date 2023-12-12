@@ -1,4 +1,3 @@
-import processing.core.PGraphics;
 import processing.core.PVector;
 
 import java.lang.ref.WeakReference;
@@ -44,6 +43,11 @@ public class Player extends GameEntity {
 
   /* internal vars */
   private final ArrayList<Item> items = new ArrayList<>();
+
+  // briefly prevents the player from shooting after gameplay resumes to prevent issues with sound effects
+  public static final float FIRE_LOCKOUT_DURATION = 0.25f;
+  public float fireLockoutTimer = 0;
+
 
   /* ctor */
   Player(PVector position) {
@@ -192,7 +196,12 @@ public class Player extends GameEntity {
 
     // update aim angle and fire weapon
     aimDirection = (float)atan2(Input.mousePos.y - onscreenPos.y, Input.mousePos.x - onscreenPos.x);
-    weapon.doFireCheck();
+    if (fireLockoutTimer > 0) {
+      fireLockoutTimer -= dt;
+    }
+    else {
+      weapon.doFireCheck();
+    }
 
     setColliderPos(position);
     setColliderAngle(aimDirection + (float)(PI / 2));
@@ -248,11 +257,13 @@ public class Player extends GameEntity {
     currentHealth -= dmg;
     if (currentHealth <= 0) {
       Main.playerDead = true;
+      SoundManager.play("game over");
     }
     else {
       // trigger effects for all items - if the items doesn't do anything when this happens, its onTakeDamage
       // method will automatically do nothing
       items.forEach((item) -> item.onTakeDamage(this, dmg));
+      SoundManager.play("take damage");
     }
   }
 

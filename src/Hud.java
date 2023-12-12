@@ -261,6 +261,7 @@ public class Hud {
     // disable the cursor during gameplay
     if (state == Main.GameState.GAMEPLAY) {
       app.noCursor();
+      Main.player.get().fireLockoutTimer = Player.FIRE_LOCKOUT_DURATION;
     }
     else {
       app.cursor(ARROW);
@@ -330,6 +331,7 @@ public class Hud {
               Main.enemyManager.get().loadWave(Main.currentWave);
               Main.paused = false;
               setState(Main.GameState.GAMEPLAY);
+              SoundManager.play("get upgrade");
             }
           }
           break;
@@ -483,7 +485,7 @@ public class Hud {
             pg.fill(Colors.WHITE.getCode());
             pg.stroke(Colors.BLACK.getCode());
             pg.strokeWeight(4);
-            pg.rect(Input.mousePos.x, Input.mousePos.y, 350, upgrades[i].tooltipHeight);
+            pg.rect(Input.mousePos.x, Input.mousePos.y, 400, upgrades[i].tooltipHeight);
             pg.noStroke();
             pg.fill(Colors.BLACK.getCode());
             pg.textAlign(LEFT, TOP);
@@ -491,7 +493,7 @@ public class Hud {
             pg.text(upgrades[i].name, Input.mousePos.x + 10, Input.mousePos.y + 10);
             pg.fill(Colors.DARK_TEAL.getCode());
             pg.textFont(OLNEY_LIGHT_16);
-            pg.text(upgrades[i].description, Input.mousePos.x + 10, Input.mousePos.y + 50, 330, 1000);
+            pg.text(upgrades[i].description, Input.mousePos.x + 10, Input.mousePos.y + 50, 380, 1000);
           }
         }
         break;
@@ -534,7 +536,7 @@ public class Hud {
         name = item.getName();
         description = item.getDescription();
       }
-      tooltipHeight = Hud.textHeight(description, OLNEY_LIGHT_16, 330) + 50;
+      tooltipHeight = Hud.textHeight(description, OLNEY_LIGHT_16, 380) + 50;
     }
   }
 

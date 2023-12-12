@@ -1,5 +1,4 @@
 import processing.core.PApplet;
-import processing.core.PImage;
 import processing.data.JSONArray;
 
 import java.lang.ref.WeakReference;
@@ -17,7 +16,7 @@ public class Main extends PApplet {
 
   /* debug stuff */
   public static boolean VERBOSE = false;
-  public static boolean FORCE_DEBUG_WAVE = true; // loads wave 0, which is reserved for testing and debugging
+  public static boolean FORCE_DEBUG_WAVE = false; // loads wave 0, which is reserved for testing and debugging
 
   /* engine/world constants */
   private static final Random random = new Random();
@@ -90,6 +89,10 @@ public class Main extends PApplet {
     }
     // give Sprite a reference to load images with
     Sprite.app = this;
+
+    // setup sound effects
+    SoundManager.init(this);
+
     // set up engine
     engine = new Engine(this);
     engine.setCameraEnabled(true);
@@ -147,9 +150,11 @@ public class Main extends PApplet {
           paused = true;
           engine.removeTagged("bullet");
           Hud.setState(GameState.WAVE_COMPLETE);
+          SoundManager.play("wave complete");
         }
         else {
           setState(GameState.RUN_COMPLETE);
+          SoundManager.play("run complete");
         }
       }
     }
@@ -171,7 +176,6 @@ public class Main extends PApplet {
   public void setState(GameState newState) {
     paused = false;
     gameState = newState;
-    Hud.setState(newState);
 
     if (gameState == GameState.GAMEPLAY) {
       engine.purge(); // clear out any old entities
@@ -200,6 +204,8 @@ public class Main extends PApplet {
       currentWave = FORCE_DEBUG_WAVE ? 0 : 1;
       enemyManager.get().loadWave(currentWave);
     }
+
+    Hud.setState(newState);
   }
 
   /* override exit() to run stuff before exiting */
