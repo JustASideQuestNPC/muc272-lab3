@@ -24,7 +24,7 @@ public enum Item {
       null
   ),
   MAX_STAMINA_BOOST(
-      "High-Capacity Batteries",
+      "Extra Batteries",
       "Permanently increase your maximum Energy.",
       false,
       (player) -> {

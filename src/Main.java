@@ -261,7 +261,8 @@ public class Main extends PApplet {
     MAIN_MENU,
     WAVE_COMPLETE,
     RUN_COMPLETE,
-    GAME_OVER
+    GAME_OVER,
+    HOW_TO_PLAY
   }
 
   // why did no one think to add a "random in range" function? if c++ has one then java has no excuse

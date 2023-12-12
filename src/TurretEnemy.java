@@ -6,8 +6,8 @@ import static processing.core.PConstants.PI;
 
 /* a stationary enemy that shoots bullets at the player */
 public class TurretEnemy extends EnemySuper {
-  private static final float BURST_DELAY = 1; // time between bursts
-  private static final float SHOT_DELAY = 0.075f; // time between shots in a burst
+  private static final float BURST_DELAY = 1.25f; // time between bursts
+  private static final float SHOT_DELAY = 0.15f; // time between shots in a burst
   private static final int SHOTS_PER_BURST = 4;
   private static final int BULLET_VELOCITY = 750;
   private static final float BULLET_DAMAGE = 20;
@@ -18,7 +18,7 @@ public class TurretEnemy extends EnemySuper {
   private float shotCooldown = BURST_DELAY;
 
   TurretEnemy(PVector position) {
-    currentHealth = 200;
+    currentHealth = 150;
     this.position = position.copy();
     this.sprite = new Sprite("sprites/turret-base.png")
         .setDisplayAnchor(Sprite.DisplayAnchor.CENTER)
@@ -123,4 +123,7 @@ public class TurretEnemy extends EnemySuper {
       engine.addEntity(new Bullet(bulletSpawnPoint, bulletVelocity, BULLET_DAMAGE, false));
     }
   }
+
+  @Override
+  public void runOnDeath() { EnemyManager.EnemyType.TURRET.removeEnemy(); }
 }

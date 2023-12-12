@@ -16,5 +16,25 @@
       "total"     : 7,
       "max active": 2
     }
+  },
+  {
+    "chaser": {
+      "total"     : 4,
+      "max active": 2
+    },
+    "turret": {
+      "total"     : 1,
+      "max active": 1
+    }
+  },
+  {
+    "chaser": {
+      "total"     : 5,
+      "max active": 2
+    },
+    "turret": {
+      "total"     : 2,
+      "max active": 2
+    }
   }
 ]

@@ -96,7 +96,7 @@ public class Hud {
         .setHoveredTextColor(Colors.WHITE));
 
     buttons.put("main menu start game", new Button(pg)
-        .setPos(width / 2 - 350, height / 2 - 60)
+        .setPos(width / 2 - 350, height / 2 - 120)
         .setSize(700, 100)
         .setText("Start game")
         .setFont(UAV_OSD_SANS_MONO_48)
@@ -107,8 +107,20 @@ public class Hud {
         .setHoveredFillColor(Colors.BLACK)
         .setHoveredTextColor(Colors.WHITE));
 
+    buttons.put("main menu how to play", new Button(pg)
+        .setPos(width / 2 - 350, height / 2)
+        .setSize(700, 100)
+        .setText("How to play")
+        .setFont(UAV_OSD_SANS_MONO_48)
+        .setTextAlign(CENTER, CENTER)
+        .setFillColor(Colors.WHITE)
+        .setStrokeColor(Colors.BLACK)
+        .setStrokeWeight(5)
+        .setHoveredFillColor(Colors.BLACK)
+        .setHoveredTextColor(Colors.WHITE));
+
     buttons.put("main menu exit to desktop", new Button(pg)
-        .setPos(width / 2 - 350, height / 2 + 60)
+        .setPos(width / 2 - 350, height / 2 + 120)
         .setSize(700, 100)
         .setText("Exit to desktop")
         .setFont(UAV_OSD_SANS_MONO_48)
@@ -189,21 +201,42 @@ public class Hud {
         .setSize(150, 150)
         .setFillColor(Colors.WHITE)
         .setStrokeColor(Colors.BLACK)
-        .setStrokeWeight(4));
+        .setStrokeWeight(4)
+        .setFont(UAV_OSD_SANS_MONO_20)
+        .setTextAlign(CENTER, CENTER)
+        .setTextColor(Colors.BLACK));
 
     buttons.put("wave complete item 1", new Button(pg)
         .setPos(width / 2 - 75, height / 4 + 50)
         .setSize(150, 150)
         .setFillColor(Colors.WHITE)
         .setStrokeColor(Colors.BLACK)
-        .setStrokeWeight(4));
+        .setStrokeWeight(4)
+        .setFont(UAV_OSD_SANS_MONO_20)
+        .setTextAlign(CENTER, CENTER)
+        .setTextColor(Colors.BLACK));
 
     buttons.put("wave complete item 2", new Button(pg)
         .setPos(width / 2 + 100, height / 4 + 50)
         .setSize(150, 150)
         .setFillColor(Colors.WHITE)
         .setStrokeColor(Colors.BLACK)
-        .setStrokeWeight(4));
+        .setStrokeWeight(4)
+        .setFont(UAV_OSD_SANS_MONO_20)
+        .setTextAlign(CENTER, CENTER)
+        .setTextColor(Colors.BLACK));
+
+    buttons.put("how to play exit to menu", new Button(pg)
+        .setPos(width / 2 - 425, height - 175)
+        .setSize(850, 100)
+        .setText("Return to main menu")
+        .setFont(UAV_OSD_SANS_MONO_48)
+        .setTextAlign(CENTER, CENTER)
+        .setFillColor(Colors.WHITE)
+        .setStrokeColor(Colors.BLACK)
+        .setStrokeWeight(5)
+        .setHoveredFillColor(Colors.BLACK)
+        .setHoveredTextColor(Colors.WHITE));
 
     // create button groups
     buttonGroups.put(Main.GameState.PAUSE_MENU, new String[]{
@@ -213,7 +246,8 @@ public class Hud {
     });
     buttonGroups.put(Main.GameState.MAIN_MENU, new String[]{
         "main menu start game",
-        "main menu exit to desktop"
+        "main menu exit to desktop",
+        "main menu how to play"
     });
     buttonGroups.put(Main.GameState.WAVE_COMPLETE, new String[]{
         "wave complete exit to menu",
@@ -230,6 +264,9 @@ public class Hud {
         "game over restart run",
         "game over exit to menu",
         "game over exit to desktop"
+    });
+    buttonGroups.put(Main.GameState.HOW_TO_PLAY, new String[]{
+       "how to play exit to menu"
     });
 
     // add sprites for hud elements
@@ -274,6 +311,9 @@ public class Hud {
       availableItems = new ArrayList<>(Main.unequippedItems);
       for (int i = 0; i < upgrades.length; ++i) {
         upgrades[i] = new UpgradeHolder();
+        String buttonName = String.format("wave complete item %d", i);
+        if (upgrades[i].isWeapon) buttons.get(buttonName).setText("Weapon\nImage\nHere");
+        else buttons.get(buttonName).setText("Upgrade\nImage\nHere");
       }
     }
   }
@@ -307,6 +347,9 @@ public class Hud {
           }
           if (buttons.get("main menu exit to desktop").isPressed()) {
             app.exit();
+          }
+          if (buttons.get("main menu how to play").isPressed()) {
+            Hud.setState(Main.GameState.HOW_TO_PLAY);
           }
           break;
         case WAVE_COMPLETE:
@@ -344,6 +387,11 @@ public class Hud {
           }
           if (buttons.get("game over exit to desktop").isPressed()) {
             app.exit();
+          }
+          break;
+        case HOW_TO_PLAY:
+          if (buttons.get("how to play exit to menu").isPressed()) {
+            Hud.setState(Main.GameState.MAIN_MENU);
           }
       }
     }
@@ -478,6 +526,7 @@ public class Hud {
         pg.text("WAVE COMPLETE", width / 2f, height / 6f - 10);
         pg.textFont(UAV_OSD_SANS_MONO_28);
         pg.text("Choose an item to go the next wave", width / 2f, height / 4f);
+
         // draw tooltips for each item
         for (int i = 0; i < upgrades.length; ++i) {
           String buttonName = String.format("wave complete item %d", i);
@@ -512,6 +561,35 @@ public class Hud {
         pg.text("RUN COMPLETE", width / 2f, height / 6f - 10);
         pg.textFont(UAV_OSD_SANS_MONO_28);
         pg.text("You win!", width / 2f, height / 4f);
+        break;
+      case HOW_TO_PLAY:
+        pg.textFont(UAV_OSD_SANS_MONO_64);
+        pg.textAlign(CENTER, CENTER);
+        pg.noStroke();
+        pg.fill(Colors.BLACK.getCode());
+        pg.text("HOW TO PLAY", width / 2f, height / 6f);
+
+        // draw main body text
+        pg.textFont(UAV_OSD_SANS_MONO_24);
+        pg.text("""
+                         to move //       to aim
+                               to shoot your gun
+                    Tap         while moving to dash
+                    Hold       for adrenaline
+                    Dashing and adrenaline consume energy
+                    Don't die
+                    """, width / 2f, height / 2f);
+
+        // display controls and actions in different colors
+        pg.pushMatrix();
+        pg.translate(width / 2f, height / 2f);
+        pg.fill(Colors.RED.getCode());
+        pg.text("WASD", -253, -108);
+        pg.text("Mouse", 95, -108);
+        pg.text("Left Mouse", -190, -72);
+        pg.text("Spacebar", -180, -37);
+        pg.text("Shift", -106, 0);
+        pg.popMatrix();
     }
   }
 
