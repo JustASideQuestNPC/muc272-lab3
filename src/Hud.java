@@ -476,7 +476,7 @@ public class Hud {
         pg.fill(Colors.BLACK.getCode());
         pg.textAlign(LEFT, BOTTOM);
         pg.textFont(UAV_OSD_SANS_MONO_20);
-        pg.text(String.format("Wave %d\n%d Enemies", Main.currentWave, Objects.requireNonNull(Main.enemyManager.get()).getRemainingEnemies()),
+        pg.text(String.format("Wave %d\n%d Enemies", Main.currentWave, Objects.requireNonNull(Main.enemyManager.get()).getRemainingEnemies() + 1),
                 10, height - 110);
 
         // draw a reticle to show where the player is aiming

@@ -1,0 +1,14 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="placeholder_title.jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/placeholder_title_jar</output-path>
+    <root id="archive" name="placeholder-title.jar">
+      <element id="module-output" name="lab3-zombie-game" />
+      <element id="extracted-dir" path="$USER_HOME$/Documents/Processing/java_video_test/libraries/sound/library/sound.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/Documents/Processing/java_video_test/libraries/sound/library/jsyn-20171016.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$USER_HOME$/Documents/Processing/java_video_test/libraries/sound/library/javamp3-1.0.4.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../../../processing-4.2/core/library/core.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../../../processing-4.2/core/library/gluegen-rt.jar" path-in-jar="/" />
+      <element id="extracted-dir" path="$PROJECT_DIR$/../../../processing-4.2/core/library/jogl-all.jar" path-in-jar="/" />
+    </root>
+  </artifact>
+</component>

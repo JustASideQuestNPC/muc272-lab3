@@ -11,7 +11,7 @@ public enum Item {
       null,
       null
   ),
-  STAMINA_ON_DAMAGE(
+  STAMINA_ON_TAKE_DAMAGE(
       "Impact Converter",
       "Taking damage restores Energy.",
       true,
@@ -21,6 +21,30 @@ public enum Item {
         player.currentStamina += damage * 10;
         if (player.currentStamina > player.maxStamina) player.currentStamina = player.maxStamina;
       },
+      null
+  ),
+  HEALTH_ON_DEAL_DAMAGE(
+      "Blood Siphon",
+      "Dealing damage restores a small amount of health.",
+      true,
+      null,
+      (player, damage) -> {
+        player.currentHealth += damage / 2;
+        if (player.currentHealth > player.maxHealth) player.currentHealth = player.maxHealth;
+      },
+      null,
+      null
+  ),
+  STAMINA_ON_DEAL_DAMAGE(
+      "Energy Siphon",
+      "Dealing damage restores a small amount of Energy.",
+      true,
+      null,
+      (player, damage) -> {
+        player.currentStamina += damage * 2;
+        if (player.currentStamina > player.maxStamina) player.currentStamina = player.maxStamina;
+      },
+      null,
       null
   ),
   MAX_STAMINA_BOOST(
