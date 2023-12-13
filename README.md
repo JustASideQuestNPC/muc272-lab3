@@ -11,5 +11,5 @@ _Placeholder Title_ was made with [Processing](https://www.processing.org), a gr
 ## How to Play
 - Have the [Java Runtime](https://www.java.com/en) and/or [JDK 17+](https://www.oracle.com/java/technologies/downloads) installed on your system.
   - Processing runs on JDK 17, so if you have that installed then _Placeholder Title_ will run just fine. Probably.
-- Download `placeholder-title.jar` from the latest release.
+- Download `placeholder-title.jar` from the [latest release](https://github.com/JustASideQuestNPC/muc272-lab3/releases/tag/v1.0.0).
 - Run `placeholder-title.jar` and brace yourself for an "amazing" gaming experience!
