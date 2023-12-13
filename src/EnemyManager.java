@@ -33,10 +33,12 @@ public class EnemyManager extends GameEntity {
         JSONObject enemyData = waveData.getJSONObject(enemyType.getName());
         enemyType.setNumInWave(enemyData.getInt("total"));
         enemyType.setMaxActive(enemyData.getInt("max active"));
+        enemyType.setNumActive(0);
       }
       else {
         enemyType.setNumInWave(0);
         enemyType.setMaxActive(0);
+        enemyType.setNumActive(0);
       }
     }
   }
@@ -141,6 +143,10 @@ public class EnemyManager extends GameEntity {
 
     public void setMaxActive(int maxActive) {
       this.maxActive = maxActive;
+    }
+
+    public void setNumActive(int numActive) {
+      this.numActive = numActive;
     }
 
     public int getNumInWave() {

@@ -46,7 +46,7 @@ public enum Weapon {
     0,
     25,
     "AKM",
-    "Every insurgent's favorite tool."
+    "Every insurgent's favorite toy."
   ),
 
   SHOTGUN(
@@ -60,7 +60,7 @@ public enum Weapon {
       0,
       6,
       "SPAS-12",
-      "According to Half-Life, the magazine tube is also a barrel."
+      "The real thing is apparently terrible."
   );
 
   private final FireMode fireMode;
