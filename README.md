@@ -1,10 +1,10 @@
 # _Placeholder Title_ 
-A top-down shooter I wrote in a week and a half for a final project. Has a variety of amazing "features", including (but not limited to):
+A top-down shooter I wrote in about 3 weeks for a final project. Has a variety of amazing "features", including (but not limited to):
 - "Fun" and "engaging" gameplay!
 - "High-quality" sound effects!
 - "Beautiful" visual design!
 - "Polished" and entirely "bug-free"!
-- Mildly questionable source code!
+- "Organized" and "sane" source code!
 
 _Placeholder Title_ was made with [Processing](https://www.processing.org), a graphics programming language that is actually just a Java library in disguise. The necessary bits of Processing are included in the release version of _Placeholder Title_, so all you need to run it is basic Java. You'll still need to download Processing if you want to play with the ~~spaghetti~~ source code for _Placeholder Title_, though.
 
